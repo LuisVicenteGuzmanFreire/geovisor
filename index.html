@@ -53,6 +53,10 @@
                 <i class="fas fa-layer-group"></i>
                 <span>Capas</span>
             </button>
+            <button class="nav-btn" id="btnInformacion" title="Acerca de">
+                <i class="fas fa-info-circle"></i>
+                <span>Acerca de</span>
+            </button>
         </div>
     </div>
 
@@ -253,6 +257,122 @@
         </div>
     </div>
 
+    <!-- Modal de Información -->
+    <div class="info-modal-overlay" id="infoModalOverlay">
+        <div class="info-modal">
+            <div class="info-modal-header">
+                <h2><i class="fas fa-info-circle"></i> Acerca del Geovisor</h2>
+                <button class="info-modal-close" id="infoModalClose">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="info-modal-content">
+                <div class="info-section">
+                    <h3><i class="fas fa-globe"></i> ¿Qué es el Geovisor?</h3>
+                    <p>
+                        El <strong>Geovisor v3</strong> es una aplicación web avanzada para visualización y análisis de datos geoespaciales. 
+                        Desarrollado con tecnologías modernas, permite cargar, visualizar, editar y exportar información geográfica 
+                        de manera intuitiva y profesional.
+                    </p>
+                </div>
+
+                <div class="info-section">
+                    <h3><i class="fas fa-star"></i> Funcionalidades Principales</h3>
+                    <div class="features-grid">
+                        <div class="feature-item">
+                            <i class="fas fa-upload"></i>
+                            <span>Carga de capas GeoJSON, KML y Shapefile</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-draw-polygon"></i>
+                            <span>Herramientas de dibujo avanzadas</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-download"></i>
+                            <span>Exportación en múltiples formatos</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-location-arrow"></i>
+                            <span>Ubicación GPS en tiempo real</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-map"></i>
+                            <span>Múltiples capas base</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-ruler"></i>
+                            <span>Medición de áreas y distancias</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-search"></i>
+                            <span>Búsqueda por coordenadas</span>
+                        </div>
+                        <div class="feature-item">
+                            <i class="fas fa-table"></i>
+                            <span>Exportación CSV con elevaciones</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-section">
+                    <h3><i class="fas fa-code"></i> Tecnologías Utilizadas</h3>
+                    <div class="tech-list">
+                        <span class="tech-badge">JavaScript ES6+</span>
+                        <span class="tech-badge">Leaflet.js</span>
+                        <span class="tech-badge">Leaflet-Geoman</span>
+                        <span class="tech-badge">Turf.js</span>
+                        <span class="tech-badge">HTML5</span>
+                        <span class="tech-badge">CSS3</span>
+                        <span class="tech-badge">GitHub Pages</span>
+                    </div>
+                </div>
+
+                <div class="info-section contact-section">
+                    <h3><i class="fas fa-user"></i> Desarrollador</h3>
+                    <div class="contact-info">
+                        <div class="contact-item">
+                            <i class="fas fa-user-circle"></i>
+                            <span><strong>Luis Vicente Guzmán Freire</strong></span>
+                        </div>
+                        <div class="contact-item">
+                            <i class="fas fa-envelope"></i>
+                            <a href="mailto:luisvicente1988@hotmail.com">luisvicente1988@hotmail.com</a>
+                        </div>
+                        <div class="contact-item">
+                            <i class="fas fa-mobile-alt"></i>
+                            <a href="tel:+593968189168">+593 96 818 9168</a>
+                        </div>
+                        <div class="contact-item">
+                            <i class="fab fa-github"></i>
+                            <a href="https://github.com/LuisVicenteGuzmanFreire" target="_blank">GitHub Profile</a>
+                        </div>
+                        <div class="contact-item">
+                            <i class="fas fa-globe"></i>
+                            <a href="https://luisvicenteguzmanfreire.github.io/luis_guzman_f/index.html" target="_blank">Portafolio Web</a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-section">
+                    <h3><i class="fas fa-rocket"></i> Versión y Actualizaciones</h3>
+                    <p>
+                        <strong>Versión:</strong> 3.0.0<br>
+                        <strong>Última actualización:</strong> Julio 2025<br>
+                        <strong>Estado:</strong> <span class="status-active">Activo</span>
+                    </p>
+                </div>
+            </div>
+
+            <div class="info-modal-footer">
+                <p>© 2025 Luis Vicente Guzmán Freire. Desarrollado con <i class="fas fa-heart" style="color: #ef4444;"></i> y tecnologías web modernas.</p>
+                <button class="info-modal-btn" id="infoModalAccept">
+                    <i class="fas fa-check"></i>
+                    Entendido
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- Scripts -->
     <script src="js/map.js"></script>
@@ -263,6 +383,7 @@
     <script src="js/ui.js"></script>
     <script src="js/dataLoader.js"></script>
     <script src="js/gps.js"></script>
+    <script src="js/info.js"></script>
     
     <script>
         window.onload = () => {
