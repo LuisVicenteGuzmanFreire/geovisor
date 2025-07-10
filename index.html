@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visor Geoespacial</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+
+    <!-- Librerías geoespaciales -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.8.0/proj4.js"></script>
+    <script src="https://unpkg.com/@turf/turf@6.5.0/turf.min.js"></script>
+    <script src="https://unpkg.com/togeojson@0.16.0/togeojson.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/shpjs@4.0.4/dist/shp.min.js"></script>
+    <script src="https://unpkg.com/jszip@3.10.1/dist/jszip.min.js"></script>
+
+    <!-- Leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+
+    <!-- Leaflet-Geoman -->
+    <link rel="stylesheet" href="https://unpkg.com/@geoman-io/leaflet-geoman-free@2.14.0/dist/leaflet-geoman.css" />
+    <script src="https://unpkg.com/@geoman-io/leaflet-geoman-free@2.14.0/dist/leaflet-geoman.min.js"></script>
+
+    <!-- Font Awesome para iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Barra superior de navegación -->
+    <div class="navbar">
+        <div class="navbar-left">
+            <div class="logo">
+                <i class="fas fa-globe"></i>
+                <span>Visor Geoespacial</span>
+            </div>
+        </div>
+        
+        <div class="navbar-center">
+            <div class="search-container">
+                <input type="text" id="direccionInput" placeholder="Buscar ubicación..." class="search-input">
+                <button id="btnBuscarDireccion" class="search-btn">
+                    <i class="fas fa-search"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div class="navbar-right">
+            <button class="nav-btn" id="toggleSidebar" title="Herramientas">
+                <i class="fas fa-tools"></i>
+                <span>Herramientas</span>
+            </button>
+            <button class="nav-btn" id="toggleInfo" title="Capas">
+                <i class="fas fa-layer-group"></i>
+                <span>Capas</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Sidebar izquierdo -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h3><i class="fas fa-tools"></i> Herramientas</h3>
+        </div>
+        
+        <div class="sidebar-content">
+            <!-- Sección de Carga de Datos -->
+            <div class="tool-section">
+                <div class="section-header">
+                    <i class="fas fa-upload"></i>
+                    <span>Cargar Datos</span>
+                </div>
+                <div class="section-content">
+                    <div class="file-input-group">
+                        <label for="uploadGeoJSON" class="file-btn">
+                            <i class="fas fa-file-code"></i>
+                            GeoJSON
+                        </label>
+                        <input type="file" id="uploadGeoJSON" accept=".geojson" hidden>
+                    </div>
+                    
+                    <div class="file-input-group">
+                        <label for="uploadKML" class="file-btn">
+                            <i class="fas fa-map-marked-alt"></i>
+                            KML
+                        </label>
+                        <input type="file" id="uploadKML" accept=".kml" hidden>
+                    </div>
+                    
+                    <div class="file-input-group">
+                        <label for="uploadShp" class="file-btn">
+                            <i class="fas fa-layer-group"></i>
+                            Shapefile
+                        </label>
+                        <input type="file" id="uploadShp" accept=".zip" hidden>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección de Navegación -->
+            <div class="tool-section">
+                <div class="section-header">
+                    <i class="fas fa-crosshairs"></i>
+                    <span>Navegación</span>
+                </div>
+                <div class="section-content">
+                    <div class="coordinate-input">
+                        <select id="tipoCoordenadas" class="coord-select">
+                            <option value="latlon">Lat/Lon</option>
+                            <option value="utm">UTM</option>
+                        </select>
+                        
+                        <div id="inputLatLon" class="coord-inputs">
+                            <input type="number" id="latInput" placeholder="Latitud" step="any">
+                            <input type="number" id="lonInput" placeholder="Longitud" step="any">
+                        </div>
+                        
+                        <div id="inputUTM" class="coord-inputs" style="display: none;">
+                            <input type="number" id="utmEste" placeholder="Este" step="any">
+                            <input type="number" id="utmNorte" placeholder="Norte" step="any">
+                            <div class="utm-zone">
+                                <input type="number" id="utmZona" placeholder="Zona" step="1">
+                                <select id="utmHemisferio">
+                                    <option value="N">N</option>
+                                    <option value="S">S</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <button id="btnIr" class="coord-btn">
+                            <i class="fas fa-crosshairs"></i>
+                            Ir a Coordenadas
+                        </button>
+                        
+                        <button id="btnUbicacionGPS" class="gps-btn">
+                            <i class="fas fa-location-arrow"></i>
+                            Mi Ubicación GPS
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sección de Exportación -->
+            <div class="tool-section">
+                <div class="section-header">
+                    <i class="fas fa-download"></i>
+                    <span>Exportar</span>
+                </div>
+                <div class="section-content">
+                    <button id="exportGeoJSON" class="export-btn">
+                        <i class="fas fa-file-export"></i>
+                        Exportar GeoJSON
+                    </button>
+                    <button id="exportKML" class="export-btn">
+                        <i class="fas fa-file-export"></i>
+                        Exportar KML
+                    </button>
+                    <button id="exportCSV" class="export-btn">
+                        <i class="fas fa-file-csv"></i>
+                        Exportar CSV
+                    </button>
+                </div>
+            </div>
+
+            <!-- Sección de Edición -->
+            <div class="tool-section">
+                <div class="section-header">
+                    <i class="fas fa-edit"></i>
+                    <span>Edición</span>
+                </div>
+                <div class="section-content">
+                    <div class="edit-tools-info">
+                        <p><i class="fas fa-info-circle"></i> Usa las herramientas de dibujo del mapa para crear geometrías</p>
+                    </div>
+                    <button id="clearGeometrias" class="tool-btn clear-btn">
+                        <i class="fas fa-trash"></i>
+                        Limpiar Geometrías Dibujadas
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Panel derecho de información -->
+    <div class="info-panel" id="infoPanel">
+        <div class="panel-header">
+            <h3><i class="fas fa-layer-group"></i> Capas</h3>
+        </div>
+        
+        <div class="panel-content">
+            <div id="panelCapas" class="layers-container">
+                <div class="no-layers">
+                    <i class="fas fa-info-circle"></i>
+                    <p>No hay capas cargadas</p>
+                </div>
+                <ul id="listaCapas"></ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Área del mapa -->
+    <div id="map" class="map-container"></div>
+
+    <!-- Panel inferior de coordenadas -->
+    <div class="status-bar">
+        <div class="coordinates-display">
+            <span id="latlon">Lat: -, Lng: -</span>
+            <span class="separator">|</span>
+            <span id="utm">UTM: -</span>
+            <span class="separator">|</span>
+            <span id="epsg">EPSG: -</span>
+        </div>
+        <div class="status-info">
+            <span id="mapStatus">Listo</span>
+        </div>
+    </div>
+
+    <!-- Elementos de feedback visual -->
+    <div class="loading-overlay" id="loadingOverlay"></div>
+    <div class="loader" id="loader">
+        <div class="spinner"></div>
+    </div>
+    <div class="status-message" id="statusMessage"></div>
+
+    <!-- Ventana emergente para previsualización CSV -->
+    <div class="csv-preview-overlay" id="csvPreviewOverlay">
+        <div class="csv-preview-modal">
+            <div class="csv-preview-header">
+                <h3><i class="fas fa-table"></i> Previsualización de Datos CSV</h3>
+                <button class="csv-preview-close" id="csvPreviewClose">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="csv-preview-content">
+                <table class="csv-preview-table" id="csvPreviewTable">
+                    <!-- Contenido dinámico -->
+                </table>
+            </div>
+            <div class="csv-preview-footer">
+                <div class="csv-preview-info" id="csvPreviewInfo">
+                    <!-- Información dinámica -->
+                </div>
+                <div class="csv-preview-actions">
+                    <button class="csv-btn csv-btn-secondary" id="csvPreviewCancel">
+                        <i class="fas fa-times"></i>
+                        Cancelar
+                    </button>
+                    <button class="csv-btn csv-btn-primary" id="csvPreviewDownload">
+                        <i class="fas fa-download"></i>
+                        Descargar CSV
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Scripts -->
+    <script src="js/map.js"></script>
+    <script src="js/layers.js"></script>
+    <script src="js/tools.js"></script>
+    <script src="js/feedback.js"></script>
+    <script src="js/interface.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/dataLoader.js"></script>
+    <script src="js/gps.js"></script>
+    
+    <script>
+        window.onload = () => {
+            inicializarApp();
+        };
+    </script>
+</body>
+</html>
