@@ -149,13 +149,21 @@
                 <div class="section-content" id="navegacion">
                     <div class="coordinate-input">
                         <select id="tipoCoordenadas" class="coord-select">
-                            <option value="latlon">Lat/Lon</option>
+                            <option value="latlon">Lat/Lon Decimal</option>
+                            <option value="dms">Coordenadas Geográficas (DMS)</option>
                             <option value="utm">UTM</option>
                         </select>
                         
                         <div id="inputLatLon" class="coord-inputs">
                             <input type="number" id="latInput" placeholder="Latitud" step="any">
                             <input type="number" id="lonInput" placeholder="Longitud" step="any">
+                        </div>
+                        
+                        <div id="inputDMS" class="coord-inputs" style="display: none;">
+                            <input type="text" id="dmsInput" placeholder="78°29'20.346&quot;W  0°20'44.158&quot;S" maxlength="50">
+                            <div class="dms-example">
+                                <small><i class="fas fa-info-circle"></i> Ejemplo: 78°29'20.346"W  0°20'44.158"S</small>
+                            </div>
                         </div>
                         
                         <div id="inputUTM" class="coord-inputs" style="display: none;">

@@ -512,6 +512,23 @@ html, body {
     outline: none;
 }
 
+/* ===== CAMPO DMS ===== */
+.dms-example {
+    margin-top: 4px;
+}
+
+.dms-example small {
+    color: var(--text-tertiary);
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.dms-example i {
+    color: var(--primary-color);
+}
+
 .coord-btn {
     display: flex;
     align-items: center;

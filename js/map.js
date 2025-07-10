@@ -468,11 +468,19 @@ Sistema UTM\t${utm.epsg}`;
     map.on("mousemove", actualizarCoordenadas);
 
     document.getElementById("tipoCoordenadas").addEventListener("change", (e) => {
-        if (e.target.value === "latlon") {
+        const tipo = e.target.value;
+        
+        // Ocultar todos los inputs primero
+        document.getElementById("inputLatLon").style.display = "none";
+        document.getElementById("inputDMS").style.display = "none";
+        document.getElementById("inputUTM").style.display = "none";
+        
+        // Mostrar el input correspondiente
+        if (tipo === "latlon") {
             document.getElementById("inputLatLon").style.display = "block";
-            document.getElementById("inputUTM").style.display = "none";
-        } else {
-            document.getElementById("inputLatLon").style.display = "none";
+        } else if (tipo === "dms") {
+            document.getElementById("inputDMS").style.display = "block";
+        } else if (tipo === "utm") {
             document.getElementById("inputUTM").style.display = "block";
         }
     });
@@ -494,6 +502,17 @@ Sistema UTM\t${utm.epsg}`;
                 if (lng < -180 || lng > 180) {
                     throw new Error("La longitud debe estar entre -180 y 180 grados");
                 }
+            } else if (tipo === "dms") {
+                const dmsInput = document.getElementById("dmsInput").value.trim();
+                
+                if (dmsInput === "") {
+                    throw new Error("Por favor, ingrese coordenadas en formato DMS");
+                }
+                
+                // Parsear coordenadas DMS usando la función definida en tools.js
+                const coords = parsearCoordenadasDMS(dmsInput);
+                lat = coords.lat;
+                lng = coords.lng;
             } else {
                 const este = parseFloat(document.getElementById("utmEste").value);
                 const norte = parseFloat(document.getElementById("utmNorte").value);
@@ -666,6 +685,13 @@ Sistema UTM\t${utm.epsg}`;
     }, 300); // Debounce de 300ms
 
     document.getElementById("btnBuscarDireccion").addEventListener("click", buscarDireccion);
+
+    // Autocompletar ejemplo para coordenadas DMS
+    document.getElementById("dmsInput").addEventListener("focus", (e) => {
+        if (e.target.value.trim() === "") {
+            e.target.placeholder = "78°29'20.346\"W  0°20'44.158\"S";
+        }
+    });
 
     // Definir la función limpiarGeometrias después de que el mapa esté inicializado
     limpiarGeometrias = () => {

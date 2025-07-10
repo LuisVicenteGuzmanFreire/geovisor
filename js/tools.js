@@ -59,6 +59,97 @@ const convertirAFormatoGoogleMaps = (lat, lng) => {
 // Hacer función accesible globalmente
 window.convertirAFormatoGoogleMaps = convertirAFormatoGoogleMaps;
 
+// Función para parsear coordenadas DMS de Google Maps
+const parsearCoordenadasDMS = (dmsString) => {
+    try {
+        // Limpiar la cadena de entrada - normalizar espacios y caracteres especiales
+        let cleanString = dmsString.trim();
+        
+        // Reemplazar caracteres especiales comunes
+        cleanString = cleanString.replace(/[""]/g, '"'); // Normalizar comillas
+        cleanString = cleanString.replace(/['']/g, "'"); // Normalizar apostrofes
+        cleanString = cleanString.replace(/\s+/g, ' '); // Normalizar espacios
+        
+        // Varios patrones para diferentes formatos posibles
+        const patterns = [
+            // Formato principal: 78°29'20.346"W  0°20'44.158"S
+            /(\d+)°(\d+)'([\d.]+)"([NSEW])\s+(\d+)°(\d+)'([\d.]+)"([NSEW])/i,
+            // Formato alternativo: 78°29'20.346"W, 0°20'44.158"S
+            /(\d+)°(\d+)'([\d.]+)"([NSEW])\s*,\s*(\d+)°(\d+)'([\d.]+)"([NSEW])/i,
+            // Formato sin espacios extra: 78°29'20.346"W 0°20'44.158"S
+            /(\d+)°(\d+)'([\d.]+)"([NSEW])\s(\d+)°(\d+)'([\d.]+)"([NSEW])/i,
+            // Formato con coordenadas al revés: 0°20'44.158"S 78°29'20.346"W
+            /(\d+)°(\d+)'([\d.]+)"([NSEW])\s+(\d+)°(\d+)'([\d.]+)"([NSEW])/i
+        ];
+        
+        let match = null;
+        
+        // Probar cada patrón
+        for (const pattern of patterns) {
+            match = cleanString.match(pattern);
+            if (match) break;
+        }
+        
+        if (!match) {
+            throw new Error(`Formato de coordenadas DMS no válido. Use el formato: 78°29'20.346"W  0°20'44.158"S`);
+        }
+        
+        // Extraer componentes
+        const [, deg1, min1, sec1, dir1, deg2, min2, sec2, dir2] = match;
+        
+        // Convertir a decimal
+        const convertDMSToDecimal = (degrees, minutes, seconds, direction) => {
+            let decimal = parseInt(degrees) + parseInt(minutes)/60 + parseFloat(seconds)/3600;
+            if (direction.toUpperCase() === 'S' || direction.toUpperCase() === 'W') {
+                decimal = -decimal;
+            }
+            return decimal;
+        };
+        
+        const coord1 = convertDMSToDecimal(deg1, min1, sec1, dir1);
+        const coord2 = convertDMSToDecimal(deg2, min2, sec2, dir2);
+        
+        // Determinar cuál es latitud y cuál es longitud basándose en las direcciones
+        let lat, lng;
+        
+        if (dir1.toUpperCase() === 'N' || dir1.toUpperCase() === 'S') {
+            // Primera coordenada es latitud
+            lat = coord1;
+            lng = coord2;
+        } else if (dir1.toUpperCase() === 'E' || dir1.toUpperCase() === 'W') {
+            // Primera coordenada es longitud
+            lat = coord2;
+            lng = coord1;
+        } else {
+            throw new Error('Direcciones cardinales no válidas. Use N, S, E, W');
+        }
+        
+        // Validar que tengamos una latitud y una longitud
+        const isLatDirection = (dir) => dir.toUpperCase() === 'N' || dir.toUpperCase() === 'S';
+        const isLngDirection = (dir) => dir.toUpperCase() === 'E' || dir.toUpperCase() === 'W';
+        
+        if (!(isLatDirection(dir1) && isLngDirection(dir2)) && !(isLngDirection(dir1) && isLatDirection(dir2))) {
+            throw new Error('Debe proporcionar una coordenada de latitud (N/S) y una de longitud (E/W)');
+        }
+        
+        // Validar rangos
+        if (lat < -90 || lat > 90) {
+            throw new Error(`La latitud ${lat.toFixed(6)} está fuera del rango válido (-90 a 90 grados)`);
+        }
+        if (lng < -180 || lng > 180) {
+            throw new Error(`La longitud ${lng.toFixed(6)} está fuera del rango válido (-180 a 180 grados)`);
+        }
+        
+        return { lat, lng };
+        
+    } catch (error) {
+        throw new Error(`Error al parsear coordenadas DMS: ${error.message}`);
+    }
+};
+
+// Hacer función accesible globalmente
+window.parsearCoordenadasDMS = parsearCoordenadasDMS;
+
 
 
 const calcularMedidas = (layer) => {
