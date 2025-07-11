@@ -555,17 +555,9 @@ UTM Este\t${utm.easting}
 UTM Norte\t${utm.northing}
 Sistema UTM\t${utm.epsg}`;
         
-                // Crear el contenido del popup con el mismo formato que otras geometrías
-                const popupContent = `
-                    <div style="font-family: monospace; font-size: 13px; max-width: 280px;">
-                        <div style="background: #2563eb; color: white; padding: 8px; margin: -8px -8px 12px -8px; border-radius: 4px 4px 0 0; display: flex; justify-content: space-between; align-items: center;">
-                            <b>🧭 Coordenada de Navegación</b>
-                            <button id="${copyId}" onclick="copiarAlPortapapeles(\`${textoCopia.replace(/`/g, '\\`')}\`, '${copyId}')" 
-                                    style="background: rgba(255,255,255,0.2); border: none; color: white; padding: 4px 8px; border-radius: 3px; cursor: pointer; font-size: 11px;"
-                                    title="Copiar coordenadas">
-                                <i class="fas fa-copy"></i> Copiar
-                            </button>
-                        </div>
+                // Crear el contenido del popup homogenizado
+                const contenidoNavegacion = `
+                    <div class="popup-info-box">
                         <b>🌐 Coordenadas Geográficas:</b><br>
                         <b>DMS:</b> ${dms.format}<br>
                         <b>Decimal:</b> ${lat.toFixed(6)}°, ${lng.toFixed(6)}°<br>
@@ -577,6 +569,8 @@ Sistema UTM\t${utm.epsg}`;
                         <b>Sistema:</b> ${utm.epsg}
                     </div>
                 `;
+                
+                const popupContent = window.crearPopupUniversal('🧭 Coordenada de Navegación', contenidoNavegacion, true, textoCopia);
         
                 // Centrar mapa y agregar marcador con el popup
                 map.setView([lat, lng], 15);
@@ -639,21 +633,13 @@ UTM Este\t${utm.easting}
 UTM Norte\t${utm.northing}
 Sistema UTM\t${utm.epsg}`;
     
-                // Crear contenido del popup con el mismo formato que otras geometrías
-                const popupContent = `
-                    <div style="font-family: monospace; font-size: 13px; max-width: 320px;">
-                        <div style="background: #2563eb; color: white; padding: 8px; margin: -8px -8px 12px -8px; border-radius: 4px 4px 0 0; display: flex; justify-content: space-between; align-items: center;">
-                            <b>🔍 Dirección Encontrada</b>
-                            <button id="${copyId}" onclick="copiarAlPortapapeles(\`${textoCopia.replace(/`/g, '\\`')}\`, '${copyId}')" 
-                                    style="background: rgba(255,255,255,0.2); border: none; color: white; padding: 4px 8px; border-radius: 3px; cursor: pointer; font-size: 11px;"
-                                    title="Copiar información">
-                                <i class="fas fa-copy"></i> Copiar
-                            </button>
-                        </div>
-                        <div style="background: #f0f9ff; padding: 8px; border-radius: 4px; margin-bottom: 12px;">
-                            <b>📍 Dirección:</b><br>
-                            <span style="font-size: 12px; line-height: 1.3;">${display_name}</span>
-                        </div>
+                // Crear contenido del popup homogenizado
+                const contenidoDireccion = `
+                    <div class="popup-attributes-box">
+                        <b>📍 Dirección:</b><br>
+                        <span style="font-size: 12px; line-height: 1.3;">${display_name}</span>
+                    </div>
+                    <div class="popup-info-box">
                         <b>🌐 Coordenadas Geográficas:</b><br>
                         <b>DMS:</b> ${dms.format}<br>
                         <b>Decimal:</b> ${parseFloat(lat).toFixed(6)}°, ${parseFloat(lon).toFixed(6)}°<br>
@@ -665,6 +651,8 @@ Sistema UTM\t${utm.epsg}`;
                         <b>Sistema:</b> ${utm.epsg}
                     </div>
                 `;
+                
+                const popupContent = window.crearPopupUniversal('🔍 Dirección Encontrada', contenidoDireccion, true, textoCopia);
     
                 // Mover el mapa y agregar un marcador
                 map.setView([lat, lon], 15);

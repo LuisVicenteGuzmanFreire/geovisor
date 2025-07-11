@@ -84,11 +84,11 @@ const formatearInformacionAtributiva = (feature, nombreCapa) => {
     
     // Crear contenido del popup con botón de copia
     let content = `
-        <div style="font-family: Arial, sans-serif; font-size: 13px; max-width: 300px;">
-            <div style="background: #2563eb; color: white; padding: 8px; margin: -8px -8px 12px -8px; border-radius: 4px 4px 0 0; display: flex; justify-content: space-between; align-items: center;">
+        <div class="popup-container">
+            <div class="popup-header">
                 <b>📊 ${nombreCapa}</b>
                 <button id="${copyId}" onclick="copiarAlPortapapeles(\`${textoCopia.replace(/`/g, '\\`')}\`, '${copyId}')" 
-                        style="background: rgba(255,255,255,0.2); border: none; color: white; padding: 4px 8px; border-radius: 3px; cursor: pointer; font-size: 11px;"
+                        class="popup-copy-btn"
                         title="Copiar información">
                     <i class="fas fa-copy"></i> Copiar
                 </button>
@@ -97,7 +97,7 @@ const formatearInformacionAtributiva = (feature, nombreCapa) => {
     
     // Información de la geometría
     content += `
-        <div style="background: #f8fafc; padding: 8px; border-radius: 4px; margin-bottom: 12px;">
+        <div class="popup-info-box">
             <b>🗺️ Tipo de Geometría:</b> ${geometry.type}<br>
     `;
     
@@ -137,7 +137,7 @@ const formatearInformacionAtributiva = (feature, nombreCapa) => {
     // Información atributiva
     if (Object.keys(properties).length > 0) {
         content += `
-            <div style="background: #f0f9ff; padding: 8px; border-radius: 4px;">
+            <div class="popup-attributes-box">
                 <b>📋 Información Atributiva:</b><br><br>
         `;
         
@@ -166,7 +166,7 @@ const formatearInformacionAtributiva = (feature, nombreCapa) => {
         content += `</div>`;
     } else {
         content += `
-            <div style="background: #fef3c7; padding: 8px; border-radius: 4px; color: #92400e;">
+            <div class="popup-warning-box">
                 <b>⚠️ Sin información atributiva</b>
             </div>
         `;
@@ -179,6 +179,34 @@ const formatearInformacionAtributiva = (feature, nombreCapa) => {
 
 // Hacer función accesible globalmente
 window.copiarAlPortapapeles = copiarAlPortapapeles;
+
+// Función universal para crear popups homogenizados
+const crearPopupUniversal = (titulo, contenido, incluyeBotonCopiar = false, textoCopia = '') => {
+    const copyId = incluyeBotonCopiar ? `copy-${Date.now()}-${Math.random().toString(36).substr(2, 9)}` : null;
+    
+    let popup = `
+        <div class="popup-container">
+            <div class="popup-header">
+                <b>${titulo}</b>
+                ${incluyeBotonCopiar ? `
+                    <button id="${copyId}" onclick="copiarAlPortapapeles(\`${textoCopia.replace(/`/g, '\\`')}\`, '${copyId}')" 
+                            class="popup-copy-btn"
+                            title="Copiar información">
+                        <i class="fas fa-copy"></i> Copiar
+                    </button>
+                ` : ''}
+            </div>
+            <div class="popup-content-body">
+                ${contenido}
+            </div>
+        </div>
+    `;
+    
+    return popup;
+};
+
+// Hacer función accesible globalmente
+window.crearPopupUniversal = crearPopupUniversal;
 
 const agregarCapaAlPanel = (nombre, capa) => {
     const lista = document.getElementById("listaCapas");

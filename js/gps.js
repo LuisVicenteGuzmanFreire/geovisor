@@ -162,35 +162,22 @@ const agregarMarcadorUbicacion = (lat, lng, precision) => {
     const dms = convertirAFormatoGoogleMaps(lat, lng);
     const timestamp = new Date().toLocaleString();
     
-    const popupContent = `
-        <div style="font-family: Arial, sans-serif; font-size: 13px; min-width: 250px;">
-            <div style="background: #10b981; color: white; padding: 8px; margin: -8px -8px 12px -8px; border-radius: 4px 4px 0 0;">
-                <b>📍 Mi Ubicación GPS</b>
-            </div>
-            
-            <div style="margin-bottom: 10px;">
-                <b>🌐 Coordenadas:</b><br>
-                <b>Lat:</b> ${lat.toFixed(6)}<br>
-                <b>Lng:</b> ${lng.toFixed(6)}
-            </div>
-            
-            <div style="margin-bottom: 10px;">
-                <b>📐 UTM:</b><br>
-                <b>Este:</b> ${utm.easting} m<br>
-                <b>Norte:</b> ${utm.northing} m<br>
-                <b>Zona:</b> ${utm.zone}
-            </div>
-            
-            <div style="margin-bottom: 10px;">
-                <b>🎯 Precisión:</b> ${Math.round(precision)} metros<br>
-                <b>🕐 Actualizado:</b> ${timestamp}
-            </div>
-            
-            <div style="font-size: 11px; color: #666; border-top: 1px solid #eee; padding-top: 8px;">
-                <b>DMS:</b> ${dms.format}
-            </div>
+    const contenidoGPS = `
+        <div class="popup-info-box">
+            <b>🌐 Coordenadas Geográficas:</b><br>
+            <b>DMS:</b> ${dms.format}<br>
+            <b>Decimal:</b> ${lat.toFixed(6)}°, ${lng.toFixed(6)}°<br><br>
+            <b>🗺️ Coordenadas UTM:</b><br>
+            <b>Zona:</b> ${utm.zone}<br>
+            <b>Este:</b> ${utm.easting} m<br>
+            <b>Norte:</b> ${utm.northing} m<br><br>
+            <b>📊 Información del GPS:</b><br>
+            <b>Precisión:</b> ±${Math.round(precision)} metros<br>
+            <b>Timestamp:</b> ${timestamp}
         </div>
     `;
+    
+    const popupContent = window.crearPopupUniversal('📍 Mi Ubicación GPS', contenidoGPS);
     
     marcadorUbicacion.bindPopup(popupContent);
     

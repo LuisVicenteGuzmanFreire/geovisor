@@ -173,16 +173,8 @@ const calcularMedidas = (layer) => {
 Perímetro (m)\t${perimeter.toFixed(2)}
 Perímetro (km)\t${(perimeter / 1000).toFixed(3)}`;
         
-        const popupContent = `
-            <div style="font-family: monospace; font-size: 13px; max-width: 280px;">
-                <div style="background: #2563eb; color: white; padding: 8px; margin: -8px -8px 12px -8px; border-radius: 4px 4px 0 0; display: flex; justify-content: space-between; align-items: center;">
-                    <b>📐 Polígono Dibujado</b>
-                    <button id="${copyId}" onclick="copiarAlPortapapeles(\`${textoCopia.replace(/`/g, '\\`')}\`, '${copyId}')" 
-                            style="background: rgba(255,255,255,0.2); border: none; color: white; padding: 4px 8px; border-radius: 3px; cursor: pointer; font-size: 11px;"
-                            title="Copiar medidas">
-                        <i class="fas fa-copy"></i> Copiar
-                    </button>
-                </div>
+        const contenidoPoligono = `
+            <div class="popup-info-box">
                 <b>🔳 Área:</b><br>
                 <b>Metros²:</b> ${area.toFixed(2)} m²<br>
                 <b>Hectáreas:</b> ${(area / 10000).toFixed(4)} ha<br>
@@ -192,6 +184,8 @@ Perímetro (km)\t${(perimeter / 1000).toFixed(3)}`;
                 <b>Kilómetros:</b> ${(perimeter / 1000).toFixed(3)} km
             </div>
         `;
+        
+        const popupContent = window.crearPopupUniversal('📐 Polígono Dibujado', contenidoPoligono, true, textoCopia);
         
         layer.bindPopup(popupContent);
     } else if (geojson.geometry.type === "LineString") {
@@ -203,21 +197,15 @@ Perímetro (km)\t${(perimeter / 1000).toFixed(3)}`;
 Longitud (m)\t${length.toFixed(2)}
 Longitud (km)\t${(length / 1000).toFixed(3)}`;
         
-        const popupContent = `
-            <div style="font-family: monospace; font-size: 13px; max-width: 280px;">
-                <div style="background: #2563eb; color: white; padding: 8px; margin: -8px -8px 12px -8px; border-radius: 4px 4px 0 0; display: flex; justify-content: space-between; align-items: center;">
-                    <b>📏 Línea Dibujada</b>
-                    <button id="${copyId}" onclick="copiarAlPortapapeles(\`${textoCopia.replace(/`/g, '\\`')}\`, '${copyId}')" 
-                            style="background: rgba(255,255,255,0.2); border: none; color: white; padding: 4px 8px; border-radius: 3px; cursor: pointer; font-size: 11px;"
-                            title="Copiar medidas">
-                        <i class="fas fa-copy"></i> Copiar
-                    </button>
-                </div>
+        const contenidoLinea = `
+            <div class="popup-info-box">
                 <b>📏 Longitud:</b><br>
                 <b>Metros:</b> ${length.toFixed(2)} m<br>
                 <b>Kilómetros:</b> ${(length / 1000).toFixed(3)} km
             </div>
         `;
+        
+        const popupContent = window.crearPopupUniversal('📏 Línea Dibujada', contenidoLinea, true, textoCopia);
         
         layer.bindPopup(popupContent);
     } else if (geojson.geometry.type === "Point" && layer.getRadius) {
@@ -234,16 +222,8 @@ Radio (km)\t${(radius / 1000).toFixed(3)}
 Área (ha)\t${(area / 10000).toFixed(4)}
 Área (km²)\t${(area / 1000000).toFixed(6)}`;
         
-        const popupContent = `
-            <div style="font-family: monospace; font-size: 13px; max-width: 280px;">
-                <div style="background: #2563eb; color: white; padding: 8px; margin: -8px -8px 12px -8px; border-radius: 4px 4px 0 0; display: flex; justify-content: space-between; align-items: center;">
-                    <b>⭕ Círculo Dibujado</b>
-                    <button id="${copyId}" onclick="copiarAlPortapapeles(\`${textoCopia.replace(/`/g, '\\`')}\`, '${copyId}')" 
-                            style="background: rgba(255,255,255,0.2); border: none; color: white; padding: 4px 8px; border-radius: 3px; cursor: pointer; font-size: 11px;"
-                            title="Copiar medidas">
-                        <i class="fas fa-copy"></i> Copiar
-                    </button>
-                </div>
+        const contenidoCirculo = `
+            <div class="popup-info-box">
                 <b>⭕ Radio:</b><br>
                 <b>Metros:</b> ${radius.toFixed(2)} m<br>
                 <b>Kilómetros:</b> ${(radius / 1000).toFixed(3)} km<br><br>
@@ -253,6 +233,8 @@ Radio (km)\t${(radius / 1000).toFixed(3)}
                 <b>Kilómetros²:</b> ${(area / 1000000).toFixed(6)} km²
             </div>
         `;
+        
+        const popupContent = window.crearPopupUniversal('⭕ Círculo Dibujado', contenidoCirculo, true, textoCopia);
         
         layer.bindPopup(popupContent);
     }

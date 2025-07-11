@@ -6,27 +6,33 @@
 }
 
 :root {
-    /* Tema Claro */
-    --primary-color: #3b82f6;
-    --primary-hover: #2563eb;
+    /* Tema Claro - Homogenizado */
+    --primary-color: #2563eb;
+    --primary-hover: #1d4ed8;
+    --primary-light: #3b82f6;
     --secondary-color: #64748b;
-    --success-color: #10b981;
-    --warning-color: #f59e0b;
-    --error-color: #ef4444;
+    --success-color: #059669;
+    --warning-color: #d97706;
+    --error-color: #dc2626;
     --background-color: #f8fafc;
     --background-secondary: #f1f5f9;
+    --background-tertiary: #e2e8f0;
     --surface-color: #ffffff;
     --surface-elevated: #ffffff;
+    --surface-hover: #f8fafc;
     --text-primary: #0f172a;
     --text-secondary: #475569;
     --text-tertiary: #64748b;
+    --text-muted: #94a3b8;
     --border-color: #e2e8f0;
     --border-light: #f1f5f9;
-    --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-    --gradient-primary: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    --border-dark: #cbd5e1;
+    --shadow: 0 1px 3px 0 rgba(15, 23, 42, 0.1), 0 1px 2px 0 rgba(15, 23, 42, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.1), 0 4px 6px -2px rgba(15, 23, 42, 0.05);
+    --shadow-xl: 0 20px 25px -5px rgba(15, 23, 42, 0.1), 0 10px 10px -5px rgba(15, 23, 42, 0.04);
+    --gradient-primary: linear-gradient(135deg, #2563eb, #1d4ed8);
     --gradient-surface: linear-gradient(135deg, #ffffff, #f8fafc);
+    --gradient-secondary: linear-gradient(135deg, #f1f5f9, #e2e8f0);
     --blur-backdrop: blur(8px);
     --navbar-height: 60px;
     --sidebar-width: 320px;
@@ -38,28 +44,34 @@
     --transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Tema Oscuro */
+/* Tema Oscuro - Homogenizado */
 [data-theme="dark"] {
-    --primary-color: #60a5fa;
-    --primary-hover: #3b82f6;
+    --primary-color: #3b82f6;
+    --primary-hover: #2563eb;
+    --primary-light: #60a5fa;
     --secondary-color: #64748b;
-    --success-color: #34d399;
-    --warning-color: #fbbf24;
-    --error-color: #f87171;
+    --success-color: #10b981;
+    --warning-color: #f59e0b;
+    --error-color: #ef4444;
     --background-color: #0f172a;
     --background-secondary: #1e293b;
+    --background-tertiary: #2d3748;
     --surface-color: #1e293b;
     --surface-elevated: #334155;
+    --surface-hover: #2d3748;
     --text-primary: #f8fafc;
     --text-secondary: #cbd5e1;
     --text-tertiary: #94a3b8;
+    --text-muted: #64748b;
     --border-color: #334155;
     --border-light: #475569;
-    --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px 0 rgba(0, 0, 0, 0.2);
-    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
-    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
-    --gradient-primary: linear-gradient(135deg, #60a5fa, #3b82f6);
+    --border-dark: #2d3748;
+    --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.4), 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.3);
+    --gradient-primary: linear-gradient(135deg, #3b82f6, #2563eb);
     --gradient-surface: linear-gradient(135deg, #1e293b, #334155);
+    --gradient-secondary: linear-gradient(135deg, #334155, #475569);
     --blur-backdrop: blur(12px);
 }
 
@@ -414,15 +426,17 @@ html, body {
     align-items: center;
     width: 100%;
     padding: 14px 16px;
-    background: var(--background-secondary);
+    background: var(--gradient-secondary);
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius);
     cursor: pointer;
     transition: var(--transition);
     font-size: 14px;
+    font-weight: 500;
     color: var(--text-primary);
     position: relative;
     overflow: hidden;
+    box-shadow: var(--shadow);
 }
 
 .file-btn::before {
@@ -446,8 +460,9 @@ html, body {
 .file-btn:hover {
     border-color: var(--primary-color);
     transform: translateY(-1px);
-    box-shadow: var(--shadow);
+    box-shadow: var(--shadow-lg);
     color: var(--primary-color);
+    background: var(--surface-hover);
 }
 
 .file-btn i {
@@ -535,18 +550,22 @@ html, body {
     justify-content: center;
     gap: 8px;
     padding: 12px;
-    background: var(--primary-color);
+    background: var(--gradient-primary);
     color: white;
-    border: none;
+    border: 1px solid var(--primary-color);
     border-radius: var(--border-radius);
     cursor: pointer;
     font-size: 14px;
-    font-weight: 500;
+    font-weight: 600;
     transition: var(--transition);
+    box-shadow: var(--shadow);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
 }
 
 .coord-btn:hover {
-    background: #1d4ed8;
+    background: var(--primary-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-lg);
 }
 
 /* ===== BOTÓN GPS ===== */
@@ -558,18 +577,22 @@ html, body {
     padding: 12px;
     background: var(--success-color);
     color: white;
-    border: none;
+    border: 1px solid var(--success-color);
     border-radius: var(--border-radius);
     cursor: pointer;
     font-size: 14px;
-    font-weight: 500;
+    font-weight: 600;
     transition: var(--transition);
     margin-top: 8px;
     position: relative;
+    box-shadow: var(--shadow);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
 }
 
 .gps-btn:hover {
-    background: #059669;
+    background: #047857;
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-lg);
 }
 
 .gps-btn:disabled {
@@ -667,16 +690,21 @@ html, body {
     padding: 10px 12px;
     background: var(--success-color);
     color: white;
-    border: none;
+    border: 1px solid var(--success-color);
     border-radius: var(--border-radius);
     cursor: pointer;
     font-size: 14px;
+    font-weight: 600;
     margin-bottom: 8px;
     transition: var(--transition);
+    box-shadow: var(--shadow);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
 }
 
 .export-btn:hover {
-    background: #059669;
+    background: #047857;
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-lg);
 }
 
 /* ===== HERRAMIENTAS GENERALES ===== */
@@ -696,10 +724,15 @@ html, body {
 .clear-btn {
     background: var(--error-color);
     color: white;
+    border: 1px solid var(--error-color);
+    box-shadow: var(--shadow);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
 }
 
 .clear-btn:hover {
-    background: #dc2626;
+    background: #b91c1c;
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-lg);
 }
 
 /* ===== INFORMACIÓN CONTEXTUAL ===== */
@@ -801,12 +834,13 @@ html, body {
     align-items: center;
     justify-content: space-between;
     padding: 12px;
-    background: var(--background-color);
+    background: var(--gradient-secondary);
     border: 1px solid var(--border-color);
     border-radius: var(--border-radius);
     margin-bottom: 8px;
     font-size: 14px;
     transition: var(--transition);
+    box-shadow: var(--shadow);
 }
 
 .layer-info {
@@ -829,8 +863,10 @@ html, body {
 }
 
 #listaCapas li:hover {
-    background: #e2e8f0;
+    background: var(--surface-hover);
     border-color: var(--primary-color);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-lg);
 }
 
 #listaCapas li.nueva-capa {
@@ -875,32 +911,41 @@ html, body {
 }
 
 .zoom-btn, .delete-btn {
-    border: none;
+    border: 1px solid;
     padding: 4px 8px;
-    border-radius: 4px;
+    border-radius: var(--border-radius);
     cursor: pointer;
     font-size: 12px;
+    font-weight: 600;
     transition: var(--transition);
     min-width: 28px;
     height: 28px;
+    box-shadow: var(--shadow);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
 }
 
 .zoom-btn {
     background: var(--primary-color);
     color: white;
+    border-color: var(--primary-color);
 }
 
 .zoom-btn:hover {
-    background: #1d4ed8;
+    background: var(--primary-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-lg);
 }
 
 .delete-btn {
     background: var(--error-color);
     color: white;
+    border-color: var(--error-color);
 }
 
 .delete-btn:hover {
-    background: #dc2626;
+    background: #b91c1c;
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-lg);
 }
 
 /* ===== ÁREA DEL MAPA ===== */
@@ -1643,6 +1688,76 @@ html, body {
 
 [data-theme="dark"] .leaflet-popup-tip {
     background: var(--surface-elevated) !important;
+}
+
+/* Estilos para popups que respetan el tema */
+.popup-container {
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    max-width: 300px;
+    color: var(--text-primary);
+}
+
+.popup-header {
+    background: var(--gradient-primary);
+    color: white;
+    padding: 8px;
+    margin: -8px -8px 12px -8px;
+    border-radius: var(--border-radius) var(--border-radius) 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: var(--shadow);
+}
+
+.popup-copy-btn {
+    background: rgba(255,255,255,0.2);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: white;
+    padding: 4px 8px;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 500;
+    transition: var(--transition);
+    backdrop-filter: blur(4px);
+}
+
+.popup-copy-btn:hover {
+    background: rgba(255,255,255,0.3);
+    border-color: rgba(255,255,255,0.5);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.popup-info-box {
+    background: var(--background-secondary);
+    padding: 8px;
+    border-radius: var(--border-radius);
+    margin-bottom: 12px;
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}
+
+.popup-attributes-box {
+    background: var(--background-secondary);
+    padding: 8px;
+    border-radius: var(--border-radius);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+}
+
+.popup-warning-box {
+    background: var(--warning-color);
+    padding: 8px;
+    border-radius: var(--border-radius);
+    color: white;
+    border: 1px solid var(--warning-color);
+}
+
+.popup-content-body {
+    color: var(--text-primary);
+    line-height: 1.5;
 }
 
 [data-theme="dark"] .leaflet-bar a {
