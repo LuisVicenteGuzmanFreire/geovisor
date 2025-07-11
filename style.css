@@ -1633,12 +1633,16 @@ html, body {
 }
 
 [data-theme="dark"] .leaflet-popup-content-wrapper {
-    background: var(--surface-elevated);
-    color: var(--text-primary);
+    background: var(--surface-elevated) !important;
+    color: var(--text-primary) !important;
+}
+
+[data-theme="dark"] .leaflet-popup-content {
+    color: var(--text-primary) !important;
 }
 
 [data-theme="dark"] .leaflet-popup-tip {
-    background: var(--surface-elevated);
+    background: var(--surface-elevated) !important;
 }
 
 [data-theme="dark"] .leaflet-bar a {
