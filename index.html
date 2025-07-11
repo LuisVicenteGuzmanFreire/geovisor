@@ -250,6 +250,78 @@
         </div>
         
         <div class="panel-content">
+            <!-- Barra de búsqueda de atributos -->
+            <div class="search-attributes-container" id="searchAttributesContainer" style="display: none;">
+                <div class="search-attributes-header">
+                    <h4><i class="fas fa-search"></i> Buscar en Atributos</h4>
+                    <button id="closeAttributeSearch" class="close-search-btn">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <!-- Opciones de búsqueda -->
+                <div class="search-options">
+                    <div class="search-mode-selector">
+                        <label class="search-mode-label">
+                            <input type="radio" name="searchMode" value="simple" checked>
+                            <span>🔍 Búsqueda Simple</span>
+                        </label>
+                        <label class="search-mode-label">
+                            <input type="radio" name="searchMode" value="advanced">
+                            <span>🎯 Búsqueda Avanzada</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <!-- Búsqueda simple -->
+                <div class="simple-search" id="simpleSearch">
+                    <div class="search-attributes-input">
+                        <input type="text" id="attributeSearchInput" placeholder="Buscar por nombre, valor, etc..." class="attribute-search-input">
+                        <button id="clearAttributeSearch" class="clear-search-btn">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Búsqueda avanzada -->
+                <div class="advanced-search" id="advancedSearch" style="display: none;">
+                    <div class="layer-selector">
+                        <label for="layerSelect">Seleccionar Capa:</label>
+                        <select id="layerSelect" class="layer-select">
+                            <option value="">-- Selecciona una capa --</option>
+                        </select>
+                    </div>
+                    <div class="search-criteria-header">
+                        <select id="searchCondition" class="search-condition-select">
+                            <option value="all">Cumplir Todas las Condiciones</option>
+                            <option value="any">Cumplir Cualquier Condición</option>
+                        </select>
+                        <button id="addSearchCriteria" class="add-criteria-btn">
+                            <i class="fas fa-plus"></i> Agregar Criterio
+                        </button>
+                    </div>
+                    <div class="search-criteria-container" id="searchCriteriaContainer">
+                        <!-- Los criterios se agregarán dinámicamente aquí -->
+                    </div>
+                    <div class="advanced-search-buttons">
+                        <button id="executeAdvancedSearch" class="search-execute-btn">
+                            <i class="fas fa-search"></i> Buscar
+                        </button>
+                        <button id="clearAdvancedSearch" class="search-clear-btn">
+                            <i class="fas fa-eraser"></i> Limpiar
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Resultados -->
+                <div class="search-results-info" id="searchResultsInfo">
+                    <span id="searchResultsCount">0</span> resultados encontrados
+                    <button id="viewSearchResults" class="view-results-btn" style="display: none;">
+                        <i class="fas fa-eye"></i> Ver Resultados
+                    </button>
+                </div>
+            </div>
+            
             <div id="panelCapas" class="layers-container">
                 <div class="no-layers">
                     <i class="fas fa-info-circle"></i>
@@ -450,6 +522,10 @@
     <script>
         window.onload = () => {
             inicializarApp();
+            // Inicializar búsqueda de atributos después de que todo esté cargado
+            if (window.inicializarBusquedaAtributos) {
+                window.inicializarBusquedaAtributos();
+            }
         };
     </script>
 </body>

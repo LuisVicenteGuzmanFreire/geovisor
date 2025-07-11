@@ -181,9 +181,112 @@ const actualizarPanelCapas = () => {
     }
 };
 
+// Inicializar eventos de búsqueda de atributos
+const inicializarBusquedaAtributos = () => {
+    const searchInput = document.getElementById('attributeSearchInput');
+    const clearBtn = document.getElementById('clearAttributeSearch');
+    const closeBtn = document.getElementById('closeAttributeSearch');
+    
+    // Búsqueda en tiempo real
+    searchInput.addEventListener('input', (e) => {
+        const texto = e.target.value;
+        if (window.buscarEnAtributos) {
+            window.buscarEnAtributos(texto);
+        }
+    });
+    
+    // Limpiar búsqueda
+    clearBtn.addEventListener('click', () => {
+        searchInput.value = '';
+        if (window.limpiarBusqueda) {
+            window.limpiarBusqueda();
+        }
+        searchInput.focus();
+    });
+    
+    // Cerrar panel de búsqueda
+    closeBtn.addEventListener('click', () => {
+        if (window.cerrarBusqueda) {
+            window.cerrarBusqueda();
+        }
+    });
+    
+    // Cambio de modo de búsqueda
+    const searchModeRadios = document.querySelectorAll('input[name="searchMode"]');
+    searchModeRadios.forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            const simpleSearch = document.getElementById('simpleSearch');
+            const advancedSearch = document.getElementById('advancedSearch');
+            
+            if (e.target.value === 'simple') {
+                simpleSearch.style.display = 'block';
+                advancedSearch.style.display = 'none';
+            } else {
+                simpleSearch.style.display = 'none';
+                advancedSearch.style.display = 'block';
+            }
+        });
+    });
+    
+    // Selector de capa para búsqueda avanzada
+    const layerSelect = document.getElementById('layerSelect');
+    layerSelect.addEventListener('change', (e) => {
+        if (window.seleccionarCapaParaBusqueda) {
+            window.seleccionarCapaParaBusqueda(e.target.value);
+        }
+    });
+    
+    // Botones de búsqueda avanzada
+    const addCriteriaBtn = document.getElementById('addSearchCriteria');
+    const executeBtn = document.getElementById('executeAdvancedSearch');
+    const clearAdvancedBtn = document.getElementById('clearAdvancedSearch');
+    const viewResultsBtn = document.getElementById('viewSearchResults');
+    
+    addCriteriaBtn.addEventListener('click', () => {
+        if (window.agregarCriterio) {
+            window.agregarCriterio();
+        }
+    });
+    
+    executeBtn.addEventListener('click', () => {
+        if (window.ejecutarBusquedaAvanzada) {
+            window.ejecutarBusquedaAvanzada();
+        }
+    });
+    
+    clearAdvancedBtn.addEventListener('click', () => {
+        if (window.limpiarBusquedaAvanzada) {
+            window.limpiarBusquedaAvanzada();
+        }
+    });
+    
+    viewResultsBtn.addEventListener('click', () => {
+        // Hacer zoom a los resultados
+        if (window.currentSearchResults && window.currentSearchResults.length > 0) {
+            const group = new L.featureGroup(window.highlightedFeatures);
+            if (window.map) {
+                window.map.fitBounds(group.getBounds(), { padding: [20, 20] });
+            }
+        }
+    });
+    
+    // Cerrar con ESC
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            const searchContainer = document.getElementById('searchAttributesContainer');
+            if (searchContainer.style.display !== 'none') {
+                if (window.cerrarBusqueda) {
+                    window.cerrarBusqueda();
+                }
+            }
+        }
+    });
+};
+
 // Hacer funciones accesibles globalmente
 window.inicializarInterfaz = inicializarInterfaz;
 window.toggleSidebar = toggleSidebar;
 window.toggleInfoPanel = toggleInfoPanel;
 window.actualizarPanelCapas = actualizarPanelCapas;
 window.updateMapArea = updateMapArea;
+window.inicializarBusquedaAtributos = inicializarBusquedaAtributos;

@@ -208,6 +208,460 @@ const crearPopupUniversal = (titulo, contenido, incluyeBotonCopiar = false, text
 // Hacer función accesible globalmente
 window.crearPopupUniversal = crearPopupUniversal;
 
+// Variables para el sistema de búsqueda
+let currentSearchLayer = null;
+let currentSearchResults = [];
+let highlightedFeatures = [];
+let availableFields = [];
+let criteriaCounter = 0;
+
+// Función para iniciar búsqueda en una capa específica
+const buscarEnCapa = (nombreCapa) => {
+    console.log(`🔍 Iniciando búsqueda en capa: ${nombreCapa}`);
+    
+    if (!window.capasCargadas || !window.capasCargadas[nombreCapa]) {
+        mostrarMensaje('Capa no encontrada', 'error');
+        return;
+    }
+    
+    currentSearchLayer = nombreCapa;
+    currentSearchResults = [];
+    highlightedFeatures = [];
+    
+    // Obtener campos disponibles de la capa
+    obtenerCamposDisponibles(nombreCapa);
+    
+    // Mostrar el panel de búsqueda
+    const searchContainer = document.getElementById('searchAttributesContainer');
+    searchContainer.style.display = 'block';
+    
+    // Limpiar campo de búsqueda
+    const searchInput = document.getElementById('attributeSearchInput');
+    searchInput.value = '';
+    searchInput.focus();
+    
+    // Actualizar contador
+    document.getElementById('searchResultsCount').textContent = '0';
+    
+    mostrarMensaje(`Búsqueda activada para capa: ${nombreCapa}`, 'success');
+};
+
+// Función para obtener campos disponibles de una capa
+const obtenerCamposDisponibles = (nombreCapa) => {
+    availableFields = [];
+    const capa = window.capasCargadas[nombreCapa];
+    
+    if (!capa) return;
+    
+    // Examinar la primera feature para obtener los campos
+    capa.eachLayer((layer) => {
+        if (layer.feature && layer.feature.properties && availableFields.length === 0) {
+            availableFields = Object.keys(layer.feature.properties);
+        }
+    });
+    
+    console.log(`📋 Campos disponibles en ${nombreCapa}:`, availableFields);
+};
+
+// Función para realizar búsqueda en tiempo real
+const buscarEnAtributos = (textoBusqueda) => {
+    if (!currentSearchLayer || !textoBusqueda.trim()) {
+        limpiarBusqueda();
+        return;
+    }
+    
+    const capa = window.capasCargadas[currentSearchLayer];
+    if (!capa) return;
+    
+    const termino = textoBusqueda.toLowerCase().trim();
+    currentSearchResults = [];
+    
+    // Buscar en todas las features de la capa
+    capa.eachLayer((layer) => {
+        if (layer.feature && layer.feature.properties) {
+            const properties = layer.feature.properties;
+            let encontrado = false;
+            
+            // Buscar en todos los atributos
+            Object.entries(properties).forEach(([key, value]) => {
+                if (value && value.toString().toLowerCase().includes(termino)) {
+                    encontrado = true;
+                }
+            });
+            
+            if (encontrado) {
+                currentSearchResults.push({
+                    layer: layer,
+                    feature: layer.feature,
+                    properties: properties
+                });
+            }
+        }
+    });
+    
+    // Actualizar contador
+    document.getElementById('searchResultsCount').textContent = currentSearchResults.length;
+    
+    // Resaltar resultados en el mapa
+    resaltarResultados();
+    
+    console.log(`🔍 Búsqueda completada: ${currentSearchResults.length} resultados para "${termino}"`);
+};
+
+// Función para resaltar resultados en el mapa
+const resaltarResultados = () => {
+    // Limpiar resaltados anteriores
+    limpiarResaltados();
+    
+    if (currentSearchResults.length === 0) return;
+    
+    // Crear grupo para elementos resaltados
+    const highlightGroup = L.layerGroup();
+    
+    currentSearchResults.forEach(result => {
+        const { layer, feature } = result;
+        
+        if (feature.geometry.type === 'Point') {
+            // Para puntos, crear un círculo resaltado
+            const latlng = layer.getLatLng();
+            const highlight = L.circleMarker(latlng, {
+                radius: 12,
+                color: '#ff6b35',
+                weight: 3,
+                opacity: 0.8,
+                fillColor: '#ff6b35',
+                fillOpacity: 0.2
+            });
+            highlightGroup.addLayer(highlight);
+            highlightedFeatures.push(highlight);
+        } else if (feature.geometry.type === 'Polygon' || feature.geometry.type === 'MultiPolygon') {
+            // Para polígonos, crear borde resaltado
+            const bounds = layer.getBounds();
+            const highlight = L.polygon(layer.getLatLngs(), {
+                color: '#ff6b35',
+                weight: 4,
+                opacity: 0.8,
+                fillColor: '#ff6b35',
+                fillOpacity: 0.1
+            });
+            highlightGroup.addLayer(highlight);
+            highlightedFeatures.push(highlight);
+        } else if (feature.geometry.type === 'LineString') {
+            // Para líneas, crear línea resaltada
+            const highlight = L.polyline(layer.getLatLngs(), {
+                color: '#ff6b35',
+                weight: 5,
+                opacity: 0.8
+            });
+            highlightGroup.addLayer(highlight);
+            highlightedFeatures.push(highlight);
+        }
+    });
+    
+    // Agregar grupo al mapa
+    if (highlightedFeatures.length > 0) {
+        highlightGroup.addTo(window.map);
+        
+        // Hacer zoom a los resultados si hay varios
+        if (currentSearchResults.length > 1) {
+            const group = new L.featureGroup(highlightedFeatures);
+            window.map.fitBounds(group.getBounds(), { padding: [20, 20] });
+        } else if (currentSearchResults.length === 1) {
+            // Si solo hay un resultado, hacer zoom a él
+            const result = currentSearchResults[0];
+            if (result.layer.getBounds) {
+                window.map.fitBounds(result.layer.getBounds(), { padding: [20, 20] });
+            } else if (result.layer.getLatLng) {
+                window.map.setView(result.layer.getLatLng(), 16);
+            }
+        }
+    }
+};
+
+// Función para limpiar resaltados
+const limpiarResaltados = () => {
+    highlightedFeatures.forEach(feature => {
+        if (window.map.hasLayer(feature)) {
+            window.map.removeLayer(feature);
+        }
+    });
+    highlightedFeatures = [];
+};
+
+// Función para limpiar búsqueda
+const limpiarBusqueda = () => {
+    currentSearchResults = [];
+    limpiarResaltados();
+    document.getElementById('searchResultsCount').textContent = '0';
+};
+
+// Función para cerrar búsqueda
+const cerrarBusqueda = () => {
+    limpiarBusqueda();
+    currentSearchLayer = null;
+    document.getElementById('searchAttributesContainer').style.display = 'none';
+    document.getElementById('attributeSearchInput').value = '';
+};
+
+// Funciones para búsqueda avanzada
+const agregarCriterio = () => {
+    if (!currentSearchLayer) {
+        mostrarMensaje('Primero selecciona una capa para buscar', 'warning');
+        return;
+    }
+    
+    if (availableFields.length === 0) {
+        mostrarMensaje('No hay campos disponibles en la capa seleccionada', 'warning');
+        return;
+    }
+    
+    criteriaCounter++;
+    const container = document.getElementById('searchCriteriaContainer');
+    
+    const criterioDiv = document.createElement('div');
+    criterioDiv.className = 'search-criteria-item';
+    criterioDiv.id = `criteria-${criteriaCounter}`;
+    
+    criterioDiv.innerHTML = `
+        <select class="criteria-field-select" id="field-${criteriaCounter}">
+            ${availableFields.map(field => `<option value="${field}">${field}</option>`).join('')}
+        </select>
+        <select class="criteria-operator-select" id="operator-${criteriaCounter}">
+            <option value="contains">Contiene</option>
+            <option value="equals">Igual a</option>
+            <option value="starts">Inicia con</option>
+            <option value="ends">Termina con</option>
+            <option value="greater">Mayor que</option>
+            <option value="less">Menor que</option>
+        </select>
+        <input type="text" class="criteria-value-input" id="value-${criteriaCounter}" placeholder="Escriba el valor a buscar...">
+        <button class="remove-criteria-btn" onclick="eliminarCriterio(${criteriaCounter})">
+            <i class="fas fa-times"></i>
+        </button>
+    `;
+    
+    container.appendChild(criterioDiv);
+    
+    // Debug: verificar que el elemento se creó correctamente
+    console.log('✅ Criterio agregado:', `criteria-${criteriaCounter}`);
+    console.log('📋 Contenedor:', container);
+    console.log('🔍 Elemento creado:', criterioDiv);
+    
+    // Verificar que el input de valor esté presente
+    const valueInput = document.getElementById(`value-${criteriaCounter}`);
+    if (valueInput) {
+        console.log('✅ Input de valor creado correctamente:', valueInput);
+        // Asegurar que el input sea visible
+        valueInput.style.display = 'block';
+        valueInput.style.visibility = 'visible';
+    } else {
+        console.error('❌ Input de valor NO encontrado');
+    }
+    
+    // Verificar que el contenedor sea visible
+    if (container) {
+        console.log('📋 Contenedor de criterios visible:', container.style.display !== 'none');
+        container.style.display = 'block';
+        container.style.visibility = 'visible';
+    }
+    
+    // Mostrar mensaje de confirmación
+    mostrarMensaje(`Criterio ${criteriaCounter} agregado. Complete los campos: campo, operador y valor.`, 'success');
+};
+
+const eliminarCriterio = (criterioId) => {
+    const criterio = document.getElementById(`criteria-${criterioId}`);
+    if (criterio) {
+        criterio.remove();
+    }
+};
+
+const ejecutarBusquedaAvanzada = () => {
+    if (!currentSearchLayer) {
+        mostrarMensaje('No hay capa seleccionada', 'error');
+        return;
+    }
+    
+    const criterios = obtenerCriterios();
+    if (criterios.length === 0) {
+        mostrarMensaje('Agregue al menos un criterio de búsqueda', 'warning');
+        return;
+    }
+    
+    const condicion = document.getElementById('searchCondition').value;
+    const capa = window.capasCargadas[currentSearchLayer];
+    
+    currentSearchResults = [];
+    
+    capa.eachLayer((layer) => {
+        if (layer.feature && layer.feature.properties) {
+            const properties = layer.feature.properties;
+            
+            if (condicion === 'all') {
+                // Cumplir todas las condiciones
+                const cumpleTodos = criterios.every(criterio => 
+                    evaluarCriterio(properties, criterio)
+                );
+                
+                if (cumpleTodos) {
+                    currentSearchResults.push({
+                        layer: layer,
+                        feature: layer.feature,
+                        properties: properties
+                    });
+                }
+            } else {
+                // Cumplir cualquier condición
+                const cumpleAlguno = criterios.some(criterio => 
+                    evaluarCriterio(properties, criterio)
+                );
+                
+                if (cumpleAlguno) {
+                    currentSearchResults.push({
+                        layer: layer,
+                        feature: layer.feature,
+                        properties: properties
+                    });
+                }
+            }
+        }
+    });
+    
+    // Actualizar contador
+    document.getElementById('searchResultsCount').textContent = currentSearchResults.length;
+    
+    // Resaltar resultados
+    resaltarResultados();
+    
+    // Mostrar botón de ver resultados
+    const viewBtn = document.getElementById('viewSearchResults');
+    if (currentSearchResults.length > 0) {
+        viewBtn.style.display = 'inline-block';
+    } else {
+        viewBtn.style.display = 'none';
+    }
+    
+    mostrarMensaje(`Búsqueda completada: ${currentSearchResults.length} resultados`, 'success');
+};
+
+const obtenerCriterios = () => {
+    const criterios = [];
+    const criteriosElements = document.querySelectorAll('.search-criteria-item');
+    
+    criteriosElements.forEach(elemento => {
+        const id = elemento.id.split('-')[1];
+        const field = document.getElementById(`field-${id}`).value;
+        const operator = document.getElementById(`operator-${id}`).value;
+        const value = document.getElementById(`value-${id}`).value;
+        
+        if (field && operator && value) {
+            criterios.push({ field, operator, value });
+        }
+    });
+    
+    return criterios;
+};
+
+const evaluarCriterio = (properties, criterio) => {
+    const fieldValue = properties[criterio.field];
+    const searchValue = criterio.value;
+    
+    if (fieldValue === null || fieldValue === undefined) {
+        return false;
+    }
+    
+    const fieldStr = fieldValue.toString().toLowerCase();
+    const searchStr = searchValue.toLowerCase();
+    
+    switch (criterio.operator) {
+        case 'contains':
+            return fieldStr.includes(searchStr);
+        case 'equals':
+            return fieldStr === searchStr;
+        case 'starts':
+            return fieldStr.startsWith(searchStr);
+        case 'ends':
+            return fieldStr.endsWith(searchStr);
+        case 'greater':
+            return parseFloat(fieldValue) > parseFloat(searchValue);
+        case 'less':
+            return parseFloat(fieldValue) < parseFloat(searchValue);
+        default:
+            return false;
+    }
+};
+
+const limpiarBusquedaAvanzada = () => {
+    document.getElementById('searchCriteriaContainer').innerHTML = '';
+    criteriaCounter = 0;
+    limpiarBusqueda();
+};
+
+// Función para poblar el selector de capas
+const poblarSelectorCapas = () => {
+    const layerSelect = document.getElementById('layerSelect');
+    if (!layerSelect) return;
+    
+    // Limpiar opciones existentes excepto la primera
+    layerSelect.innerHTML = '<option value="">-- Selecciona una capa --</option>';
+    
+    // Agregar una opción por cada capa cargada
+    Object.keys(window.capasCargadas || {}).forEach(nombreCapa => {
+        const option = document.createElement('option');
+        option.value = nombreCapa;
+        option.textContent = nombreCapa;
+        layerSelect.appendChild(option);
+    });
+};
+
+// Función para seleccionar una capa para búsqueda avanzada
+const seleccionarCapaParaBusqueda = (nombreCapa) => {
+    if (!nombreCapa) {
+        currentSearchLayer = null;
+        availableFields = [];
+        document.getElementById('searchCriteriaContainer').innerHTML = '';
+        criteriaCounter = 0;
+        return;
+    }
+    
+    currentSearchLayer = nombreCapa;
+    const capa = window.capasCargadas[nombreCapa];
+    
+    if (!capa) {
+        mostrarMensaje('Capa no encontrada', 'error');
+        return;
+    }
+    
+    // Obtener campos disponibles
+    availableFields = [];
+    capa.eachLayer((layer) => {
+        if (layer.feature && layer.feature.properties && availableFields.length === 0) {
+            availableFields = Object.keys(layer.feature.properties);
+        }
+    });
+    
+    console.log(`📋 Capa seleccionada: ${nombreCapa}, Campos disponibles:`, availableFields);
+    
+    // Limpiar criterios existentes
+    document.getElementById('searchCriteriaContainer').innerHTML = '';
+    criteriaCounter = 0;
+    
+    // Mostrar mensaje de confirmación
+    mostrarMensaje(`Capa "${nombreCapa}" seleccionada. ${availableFields.length} campos disponibles.`, 'success');
+};
+
+// Hacer funciones accesibles globalmente
+window.buscarEnCapa = buscarEnCapa;
+window.buscarEnAtributos = buscarEnAtributos;
+window.limpiarBusqueda = limpiarBusqueda;
+window.cerrarBusqueda = cerrarBusqueda;
+window.agregarCriterio = agregarCriterio;
+window.eliminarCriterio = eliminarCriterio;
+window.ejecutarBusquedaAvanzada = ejecutarBusquedaAvanzada;
+window.limpiarBusquedaAvanzada = limpiarBusquedaAvanzada;
+window.poblarSelectorCapas = poblarSelectorCapas;
+window.seleccionarCapaParaBusqueda = seleccionarCapaParaBusqueda;
+
 const agregarCapaAlPanel = (nombre, capa) => {
     const lista = document.getElementById("listaCapas");
     const li = document.createElement("li");
@@ -218,6 +672,7 @@ const agregarCapaAlPanel = (nombre, capa) => {
             <span class="layer-name" onclick="hacerZoomACapa('${nombre}')" title="Hacer zoom a esta capa">${nombre}</span>
         </div>
         <div class="layer-controls">
+            <button onclick="buscarEnCapa('${nombre}')" title="Buscar en atributos" class="search-btn">🔍</button>
             <button onclick="hacerZoomACapa('${nombre}')" title="Zoom a capa" class="zoom-btn">🎯</button>
             <button onclick="eliminarCapa('${nombre}')" title="Eliminar capa" class="delete-btn">❌</button>
         </div>
@@ -303,6 +758,9 @@ const agregarCapaAlPanel = (nombre, capa) => {
         mostrarMensaje(`Capa "${nombre}" añadida al panel`, 'success');
     }, 100);
     
+    // Actualizar selector de capas para búsqueda avanzada
+    poblarSelectorCapas();
+    
     console.log("📂 Capas cargadas después de agregar:", capasCargadas);
 };
 
@@ -348,6 +806,9 @@ const eliminarCapa = (nombre) => {
     } else {
         console.error("❌ Función actualizarPanelCapas no disponible");
     }
+    
+    // Actualizar selector de capas para búsqueda avanzada
+    poblarSelectorCapas();
     
     console.log("📂 Capas restantes después de eliminar:", Object.keys(capasCargadas));
 };

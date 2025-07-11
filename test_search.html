@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Advanced Search</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        .layer-selector { margin-bottom: 20px; }
+        .layer-selector select { width: 100%; padding: 8px; }
+        .criteria-container { border: 1px solid #ddd; padding: 10px; margin: 10px 0; }
+        .criteria-item { display: flex; gap: 10px; margin: 5px 0; }
+        .criteria-item select, .criteria-item input { padding: 5px; }
+        button { padding: 8px 16px; margin: 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Test Advanced Search Interface</h1>
+        
+        <div class="layer-selector">
+            <label>Seleccionar Capa:</label>
+            <select id="layerSelect">
+                <option value="">-- Selecciona una capa --</option>
+            </select>
+        </div>
+        
+        <div class="criteria-container">
+            <h3>Criterios de Búsqueda</h3>
+            <div id="searchCriteriaContainer">
+                <!-- Criteria will be added here -->
+            </div>
+            <button onclick="testAddCriteria()">Agregar Criterio</button>
+        </div>
+        
+        <div id="messages"></div>
+    </div>
+
+    <script>
+        // Test variables
+        let criteriaCounter = 0;
+        let availableFields = ['nombre', 'tipo', 'area', 'poblacion'];
+        let currentSearchLayer = null;
+        
+        function testAddCriteria() {
+            if (!currentSearchLayer) {
+                showMessage('Primero selecciona una capa para buscar', 'warning');
+                return;
+            }
+            
+            if (availableFields.length === 0) {
+                showMessage('No hay campos disponibles en la capa seleccionada', 'warning');
+                return;
+            }
+            
+            criteriaCounter++;
+            const container = document.getElementById('searchCriteriaContainer');
+            
+            const criterioDiv = document.createElement('div');
+            criterioDiv.className = 'criteria-item';
+            criterioDiv.id = `criteria-${criteriaCounter}`;
+            
+            criterioDiv.innerHTML = `
+                <select id="field-${criteriaCounter}">
+                    ${availableFields.map(field => `<option value="${field}">${field}</option>`).join('')}
+                </select>
+                <select id="operator-${criteriaCounter}">
+                    <option value="contains">Contiene</option>
+                    <option value="equals">Igual a</option>
+                    <option value="starts">Inicia con</option>
+                    <option value="ends">Termina con</option>
+                </select>
+                <input type="text" id="value-${criteriaCounter}" placeholder="Valor...">
+                <button onclick="removeCriteria(${criteriaCounter})">Eliminar</button>
+            `;
+            
+            container.appendChild(criterioDiv);
+            showMessage('Criterio agregado correctamente', 'success');
+        }
+        
+        function removeCriteria(criterioId) {
+            const criterio = document.getElementById(`criteria-${criterioId}`);
+            if (criterio) {
+                criterio.remove();
+                showMessage('Criterio eliminado', 'info');
+            }
+        }
+        
+        function showMessage(msg, type) {
+            const messages = document.getElementById('messages');
+            const div = document.createElement('div');
+            div.textContent = msg;
+            div.style.padding = '10px';
+            div.style.margin = '5px 0';
+            div.style.borderRadius = '4px';
+            
+            switch(type) {
+                case 'success':
+                    div.style.backgroundColor = '#d4edda';
+                    div.style.color = '#155724';
+                    break;
+                case 'warning':
+                    div.style.backgroundColor = '#fff3cd';
+                    div.style.color = '#856404';
+                    break;
+                case 'error':
+                    div.style.backgroundColor = '#f8d7da';
+                    div.style.color = '#721c24';
+                    break;
+                default:
+                    div.style.backgroundColor = '#d1ecf1';
+                    div.style.color = '#0c5460';
+            }
+            
+            messages.appendChild(div);
+            setTimeout(() => div.remove(), 3000);
+        }
+        
+        // Simulate layer selection
+        document.getElementById('layerSelect').addEventListener('change', (e) => {
+            currentSearchLayer = e.target.value;
+            if (currentSearchLayer) {
+                showMessage(`Capa "${currentSearchLayer}" seleccionada`, 'success');
+            } else {
+                showMessage('Ninguna capa seleccionada', 'info');
+            }
+        });
+        
+        // Populate test layers
+        const layerSelect = document.getElementById('layerSelect');
+        ['Test Layer 1', 'Test Layer 2', 'Test Layer 3'].forEach(layer => {
+            const option = document.createElement('option');
+            option.value = layer;
+            option.textContent = layer;
+            layerSelect.appendChild(option);
+        });
+    </script>
+</body>
+</html>
