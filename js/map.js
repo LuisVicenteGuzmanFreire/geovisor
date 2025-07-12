@@ -372,9 +372,35 @@ const inicializarMapa = () => {
         tooltipMedidas.setContent(contenido);
     });
 
+    // === FUNCIÓN HELPER PARA OBTENER INFO UTM CON FALLBACK ===
+    const obtenerInfoUTMConFallback = (lat, lng) => {
+        if (typeof obtenerInfoZonaUTM === 'function') {
+            return obtenerInfoUTMConFallback(lat, lng);
+        } else {
+            // Fallback al sistema básico
+            const zona = Math.floor((lng + 180) / 6) + 1;
+            const hemisferio = lat >= 0 ? 'N' : 'S';
+            const epsgCode = lat >= 0 ? `EPSG:326${zona}` : `EPSG:327${zona}`;
+            const projDef = `+proj=utm +zone=${zona} ${hemisferio === 'S' ? '+south' : ''} +datum=WGS84 +units=m +no_defs`;
+            const utmCoords = proj4(projDef, [lng, lat]);
+            
+            return {
+                easting: utmCoords[0],
+                northing: utmCoords[1],
+                zoneString: `${zona}${hemisferio}`,
+                epsg: epsgCode,
+                zone: zona,
+                hemisphere: hemisferio,
+                esEcuador: false,
+                esGalapagos: false,
+                recomendacion: `UTM Zona ${zona} ${hemisferio === 'S' ? 'Sur' : 'Norte'}`
+            };
+        }
+    };
+
     // === FUNCIÓN AUXILIAR PARA POPUP DE MARCADORES - MEJORADO CON CRS REGIONAL ===
     const crearPopupMarcador = (latlng, tipoMarcador = 'Marcador') => {
-        const infoUTM = obtenerInfoZonaUTM(latlng.lat, latlng.lng);
+        const infoUTM = obtenerInfoUTMConFallback(latlng.lat, latlng.lng);
         const dms = convertirAFormatoGoogleMaps(latlng.lat, latlng.lng);
         const copyId = `copy-marker-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
         
@@ -464,8 +490,8 @@ CRS Recomendado\t${infoUTM.recomendacion}`;
     const actualizarCoordenadas = debounce((e) => {
         const { lat, lng } = e.latlng;
         
-        // Usar el nuevo sistema de proyecciones regional
-        const infoUTM = obtenerInfoZonaUTM(lat, lng);
+        // Usar el nuevo sistema de proyecciones regional con fallback
+        const infoUTM = obtenerInfoUTMConFallback(lat, lng);
 
         document.getElementById("latlon").innerText = `Lat: ${lat.toFixed(6)}, Lng: ${lng.toFixed(6)}`;
         document.getElementById("utm").innerText = `UTM: Zona ${infoUTM.zoneString}, Este ${infoUTM.easting.toFixed(2)}, Norte ${infoUTM.northing.toFixed(2)}`;
@@ -559,7 +585,7 @@ CRS Recomendado\t${infoUTM.recomendacion}`;
         
             if (!isNaN(lat) && !isNaN(lng)) {
                 // Convertir las coordenadas ingresadas a UTM usando el sistema regional
-                const infoUTM = obtenerInfoZonaUTM(lat, lng);
+                const infoUTM = obtenerInfoUTMConFallback(lat, lng);
                 const dms = convertirAFormatoGoogleMaps(lat, lng);
                 
                 // Crear texto para Excel (separado por tabulaciones)
@@ -636,7 +662,7 @@ Sistema UTM\t${infoUTM.epsg}`;
                 const { lat, lon, display_name } = data[0];
     
                 // Convertir Lat/Lon a UTM usando el sistema regional
-                const infoUTM = obtenerInfoZonaUTM(parseFloat(lat), parseFloat(lon));
+                const infoUTM = obtenerInfoUTMConFallback(parseFloat(lat), parseFloat(lon));
                 const dms = convertirAFormatoGoogleMaps(parseFloat(lat), parseFloat(lon));
                 
                 // Crear texto para Excel (separado por tabulaciones)
