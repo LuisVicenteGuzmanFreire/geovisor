@@ -111,23 +111,19 @@
                     <i class="fas fa-chevron-down section-toggle"></i>
                 </div>
                 <div class="section-content" id="cargar-datos">
-                    <div class="file-input-group">
+                    <div class="integrated-buttons-group">
                         <label for="uploadGeoJSON" class="file-btn">
                             <i class="fas fa-file-code"></i>
                             GeoJSON
                         </label>
                         <input type="file" id="uploadGeoJSON" accept=".geojson" hidden>
-                    </div>
-                    
-                    <div class="file-input-group">
+                        
                         <label for="uploadKML" class="file-btn">
                             <i class="fas fa-map-marked-alt"></i>
                             KML
                         </label>
                         <input type="file" id="uploadKML" accept=".kml" hidden>
-                    </div>
-                    
-                    <div class="file-input-group">
+                        
                         <label for="uploadShp" class="file-btn">
                             <i class="fas fa-layer-group"></i>
                             Shapefile
@@ -178,20 +174,22 @@
                             </div>
                         </div>
                         
-                        <button id="btnIr" class="coord-btn">
-                            <i class="fas fa-crosshairs"></i>
-                            Ir a Coordenadas
-                        </button>
-                        
-                        <button id="btnUbicacionGPS" class="gps-btn">
-                            <i class="fas fa-location-arrow"></i>
-                            Mi Ubicación GPS
-                        </button>
-                        
-                        <button id="btnStreetView" class="streetview-btn">
-                            <i class="fas fa-street-view"></i>
-                            Street View
-                        </button>
+                        <div class="integrated-buttons-group">
+                            <button id="btnIr" class="coord-btn">
+                                <i class="fas fa-crosshairs"></i>
+                                Ir a Coordenadas
+                            </button>
+                            
+                            <button id="btnUbicacionGPS" class="gps-btn">
+                                <i class="fas fa-location-arrow"></i>
+                                Mi Ubicación GPS
+                            </button>
+                            
+                            <button id="btnStreetView" class="streetview-btn">
+                                <i class="fas fa-street-view"></i>
+                                Street View
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -206,18 +204,20 @@
                     <i class="fas fa-chevron-down section-toggle"></i>
                 </div>
                 <div class="section-content collapsed" id="exportar">
-                    <button id="exportGeoJSON" class="export-btn">
-                        <i class="fas fa-file-export"></i>
-                        Exportar GeoJSON
-                    </button>
-                    <button id="exportKML" class="export-btn">
-                        <i class="fas fa-file-export"></i>
-                        Exportar KML
-                    </button>
-                    <button id="exportCSV" class="export-btn">
-                        <i class="fas fa-file-csv"></i>
-                        Exportar CSV
-                    </button>
+                    <div class="integrated-buttons-group">
+                        <button id="exportGeoJSON" class="export-btn">
+                            <i class="fas fa-file-export"></i>
+                            Exportar GeoJSON
+                        </button>
+                        <button id="exportKML" class="export-btn">
+                            <i class="fas fa-file-export"></i>
+                            Exportar KML
+                        </button>
+                        <button id="exportCSV" class="export-btn">
+                            <i class="fas fa-file-csv"></i>
+                            Exportar CSV
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -292,13 +292,15 @@
                         </select>
                     </div>
                     <div class="search-criteria-header">
-                        <select id="searchCondition" class="search-condition-select">
-                            <option value="all">Cumplir Todas las Condiciones</option>
-                            <option value="any">Cumplir Cualquier Condición</option>
-                        </select>
-                        <button id="addSearchCriteria" class="add-criteria-btn">
-                            <i class="fas fa-plus"></i> Agregar Criterio
-                        </button>
+                        <div class="search-criteria-controls">
+                            <select id="searchCondition" class="search-condition-select">
+                                <option value="all">Cumplir Todas las Condiciones</option>
+                                <option value="any">Cumplir Cualquier Condición</option>
+                            </select>
+                            <button id="addSearchCriteria" class="add-criteria-btn">
+                                <i class="fas fa-plus"></i> Agregar Criterio
+                            </button>
+                        </div>
                     </div>
                     <div class="search-criteria-container" id="searchCriteriaContainer">
                         <!-- Los criterios se agregarán dinámicamente aquí -->
