@@ -404,6 +404,62 @@ const cerrarBusqueda = () => {
 };
 
 // Funciones para búsqueda avanzada
+// Función para ajustar dinámicamente la altura del contenedor de búsqueda
+const ajustarAlturaSearchContainer = () => {
+    const criteriaItems = document.querySelectorAll('.search-criteria-item');
+    const searchContainer = document.querySelector('.search-attributes-container');
+    const searchAttributesContainer = document.getElementById('searchAttributesContainer');
+    
+    if (!searchContainer || !searchAttributesContainer) return;
+    
+    // Altura base para el contenedor (header, opciones, botones, etc.)
+    const baseHeight = 280;
+    // Altura por cada criterio de búsqueda (selector de campo + operador + input + botón eliminar)
+    const heightPerCriteria = 65;
+    
+    // Calcular nueva altura basada en número de criterios
+    const newHeight = baseHeight + (criteriaItems.length * heightPerCriteria);
+    
+    // Aplicar nueva altura con límite máximo para evitar que sea demasiado grande
+    const maxHeight = 550;
+    const finalHeight = Math.min(newHeight, maxHeight);
+    
+    // Aplicar la nueva altura al contenedor padre searchAttributesContainer
+    searchAttributesContainer.style.flex = `0 0 ${finalHeight}px`;
+    searchAttributesContainer.style.minHeight = `${finalHeight}px`;
+    searchAttributesContainer.style.height = `${finalHeight}px`;
+    searchAttributesContainer.style.maxHeight = `${finalHeight}px`;
+    
+    // También ajustar el contenedor interno search-attributes-container
+    searchContainer.style.flex = '1';
+    searchContainer.style.minHeight = `${finalHeight}px`;
+    searchContainer.style.height = `${finalHeight}px`;
+    
+    // Ajustar solo scroll externo desde el primer criterio para mantener botones visibles
+    const criteriaContainer = document.getElementById('searchCriteriaContainer');
+    if (criteriaContainer) {
+        if (criteriaItems.length >= 1) {
+            // Solo scroll externo en los contenedores padres
+            searchContainer.style.overflowY = 'auto';
+            searchAttributesContainer.style.overflowY = 'auto';
+            
+            // Sin restricciones en el contenedor de criterios (sin scroll interno)
+            criteriaContainer.style.maxHeight = 'none';
+            criteriaContainer.style.overflowY = 'visible';
+        } else {
+            // Sin criterios, sin scroll
+            criteriaContainer.style.maxHeight = 'none';
+            criteriaContainer.style.overflowY = 'visible';
+            searchContainer.style.overflowY = 'hidden';
+            searchAttributesContainer.style.overflowY = 'hidden';
+        }
+    }
+    
+    console.log(`📏 Altura ajustada: ${criteriaItems.length} criterios = ${finalHeight}px`);
+    console.log(`🔄 Los contenedores searchAttributesContainer y search-attributes-container crecieron dinámicamente`);
+    console.log(`🔄 Los botones executeAdvancedSearch y clearAdvancedSearch se movieron dinámicamente`);
+};
+
 const agregarCriterio = () => {
     if (!currentSearchLayer) {
         mostrarMensaje('Primero selecciona una capa para buscar', 'warning');
@@ -442,6 +498,9 @@ const agregarCriterio = () => {
     
     container.appendChild(criterioDiv);
     
+    // Ajustar altura dinámicamente
+    ajustarAlturaSearchContainer();
+    
     // Debug: verificar que el elemento se creó correctamente
     console.log('✅ Criterio agregado:', `criteria-${criteriaCounter}`);
     console.log('📋 Contenedor:', container);
@@ -473,6 +532,8 @@ const eliminarCriterio = (criterioId) => {
     const criterio = document.getElementById(`criteria-${criterioId}`);
     if (criterio) {
         criterio.remove();
+        // Ajustar altura dinámicamente después de eliminar
+        ajustarAlturaSearchContainer();
     }
 };
 
@@ -594,6 +655,8 @@ const evaluarCriterio = (properties, criterio) => {
 const limpiarBusquedaAvanzada = () => {
     document.getElementById('searchCriteriaContainer').innerHTML = '';
     criteriaCounter = 0;
+    // Ajustar altura dinámicamente después de limpiar
+    ajustarAlturaSearchContainer();
     limpiarBusqueda();
 };
 
@@ -621,6 +684,8 @@ const seleccionarCapaParaBusqueda = (nombreCapa) => {
         availableFields = [];
         document.getElementById('searchCriteriaContainer').innerHTML = '';
         criteriaCounter = 0;
+        // Ajustar altura dinámicamente después de limpiar
+        ajustarAlturaSearchContainer();
         return;
     }
     
@@ -661,20 +726,34 @@ window.ejecutarBusquedaAvanzada = ejecutarBusquedaAvanzada;
 window.limpiarBusquedaAvanzada = limpiarBusquedaAvanzada;
 window.poblarSelectorCapas = poblarSelectorCapas;
 window.seleccionarCapaParaBusqueda = seleccionarCapaParaBusqueda;
+window.ajustarAlturaSearchContainer = ajustarAlturaSearchContainer;
 
 const agregarCapaAlPanel = (nombre, capa) => {
     const lista = document.getElementById("listaCapas");
     const li = document.createElement("li");
     li.innerHTML = `
-        <div class="layer-info">
-            <input type="checkbox" id="visibility-${nombre}" class="layer-visibility" checked 
-                   onchange="toggleCapaVisibilidad('${nombre}', this.checked)" title="Mostrar/Ocultar capa">
-            <span class="layer-name" onclick="hacerZoomACapa('${nombre}')" title="Hacer zoom a esta capa">${nombre}</span>
+        <div class="layer-header">
+            <div class="layer-visibility-control">
+                <input type="checkbox" id="visibility-${nombre}" class="layer-visibility" checked 
+                       onchange="toggleCapaVisibilidad('${nombre}', this.checked)" title="Mostrar/Ocultar capa">
+            </div>
+            <div class="layer-name-container">
+                <span class="layer-name" onclick="hacerZoomACapa('${nombre}')" title="Hacer zoom a esta capa">${nombre}</span>
+            </div>
         </div>
         <div class="layer-controls">
-            <button onclick="buscarEnCapa('${nombre}')" title="Buscar en atributos" class="search-btn">🔍</button>
-            <button onclick="hacerZoomACapa('${nombre}')" title="Zoom a capa" class="zoom-btn">🎯</button>
-            <button onclick="eliminarCapa('${nombre}')" title="Eliminar capa" class="delete-btn">❌</button>
+            <button onclick="buscarEnCapa('${nombre}')" title="Buscar en atributos" class="layer-search-btn">
+                <i class="fas fa-search"></i>
+                <span>Buscar</span>
+            </button>
+            <button onclick="hacerZoomACapa('${nombre}')" title="Zoom a capa" class="layer-zoom-btn">
+                <i class="fas fa-crosshairs"></i>
+                <span>Zoom</span>
+            </button>
+            <button onclick="eliminarCapa('${nombre}')" title="Eliminar capa" class="layer-delete-btn">
+                <i class="fas fa-trash"></i>
+                <span>Eliminar</span>
+            </button>
         </div>
     `;
     
@@ -810,7 +889,20 @@ const eliminarCapa = (nombre) => {
     // Actualizar selector de capas para búsqueda avanzada
     poblarSelectorCapas();
     
-    console.log("📂 Capas restantes después de eliminar:", Object.keys(capasCargadas));
+    // Cerrar panel de búsqueda si no quedan capas cargadas
+    const capasRestantes = Object.keys(capasCargadas);
+    console.log("📂 Capas restantes después de eliminar:", capasRestantes);
+    
+    if (capasRestantes.length === 0) {
+        // No quedan capas, cerrar panel de búsqueda
+        const searchAttributesContainer = document.getElementById('searchAttributesContainer');
+        if (searchAttributesContainer && searchAttributesContainer.style.display !== 'none') {
+            console.log("🔍 Cerrando panel de búsqueda - no hay capas cargadas");
+            if (window.cerrarBusqueda) {
+                window.cerrarBusqueda();
+            }
+        }
+    }
 };
 
 // Hacer función accesible globalmente
@@ -894,14 +986,28 @@ const actualizarListaCapas = () => {
         const estaVisible = window.map && window.map.hasLayer(capasCargadas[nombre]);
         
         li.innerHTML = `
-            <div class="layer-info">
-                <input type="checkbox" id="visibility-${nombre}" class="layer-visibility" ${estaVisible ? 'checked' : ''} 
-                       onchange="toggleCapaVisibilidad('${nombre}', this.checked)" title="Mostrar/Ocultar capa">
-                <span class="layer-name" onclick="hacerZoomACapa('${nombre}')" title="Hacer zoom a esta capa">${nombre}</span>
+            <div class="layer-header">
+                <div class="layer-visibility-control">
+                    <input type="checkbox" id="visibility-${nombre}" class="layer-visibility" ${estaVisible ? 'checked' : ''} 
+                           onchange="toggleCapaVisibilidad('${nombre}', this.checked)" title="Mostrar/Ocultar capa">
+                </div>
+                <div class="layer-name-container">
+                    <span class="layer-name" onclick="hacerZoomACapa('${nombre}')" title="Hacer zoom a esta capa">${nombre}</span>
+                </div>
             </div>
             <div class="layer-controls">
-                <button onclick="hacerZoomACapa('${nombre}')" title="Zoom a capa" class="zoom-btn">🎯</button>
-                <button onclick="eliminarCapa('${nombre}')" title="Eliminar capa" class="delete-btn">❌</button>
+                <button onclick="buscarEnCapa('${nombre}')" title="Buscar en atributos" class="layer-search-btn">
+                    <i class="fas fa-search"></i>
+                    <span>Buscar</span>
+                </button>
+                <button onclick="hacerZoomACapa('${nombre}')" title="Zoom a capa" class="layer-zoom-btn">
+                    <i class="fas fa-crosshairs"></i>
+                    <span>Zoom</span>
+                </button>
+                <button onclick="eliminarCapa('${nombre}')" title="Eliminar capa" class="layer-delete-btn">
+                    <i class="fas fa-trash"></i>
+                    <span>Eliminar</span>
+                </button>
             </div>
         `;
         

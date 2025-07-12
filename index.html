@@ -250,7 +250,16 @@
         </div>
         
         <div class="panel-content">
-            <!-- Barra de búsqueda de atributos -->
+            <!-- Panel de Capas ARRIBA -->
+            <div id="panelCapas" class="layers-container">
+                <div class="no-layers">
+                    <i class="fas fa-info-circle"></i>
+                    <p>No hay capas cargadas</p>
+                </div>
+                <ul id="listaCapas"></ul>
+            </div>
+            
+            <!-- Barra de búsqueda de atributos ABAJO -->
             <div class="search-attributes-container" id="searchAttributesContainer" style="display: none;">
                 <div class="search-attributes-header">
                     <h4><i class="fas fa-search"></i> Buscar en Atributos</h4>
@@ -292,14 +301,35 @@
                         </select>
                     </div>
                     <div class="search-criteria-header">
-                        <div class="search-criteria-controls">
-                            <select id="searchCondition" class="search-condition-select">
-                                <option value="all">Cumplir Todas las Condiciones</option>
-                                <option value="any">Cumplir Cualquier Condición</option>
-                            </select>
+                        <!-- Botón Agregar Criterio -->
+                        <div class="criteria-action-section">
                             <button id="addSearchCriteria" class="add-criteria-btn">
-                                <i class="fas fa-plus"></i> Agregar Criterio
+                                <i class="fas fa-plus"></i>
+                                <span>Agregar Criterio</span>
                             </button>
+                        </div>
+                        
+                        <!-- Sección de Configuración -->
+                        <div class="criteria-config-section">
+                            <div class="config-card">
+                                <div class="config-header">
+                                    <i class="fas fa-cogs"></i>
+                                    <span class="config-title">Lógica de Evaluación</span>
+                                </div>
+                                <div class="config-selector-wrapper">
+                                    <select id="searchCondition" class="search-condition-select">
+                                        <option value="all">
+                                            Cumplir TODAS las condiciones (AND)
+                                        </option>
+                                        <option value="any">
+                                            Cumplir CUALQUIER condición (OR)
+                                        </option>
+                                    </select>
+                                    <div class="select-arrow">
+                                        <i class="fas fa-chevron-down"></i>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <div class="search-criteria-container" id="searchCriteriaContainer">
@@ -322,14 +352,6 @@
                         <i class="fas fa-eye"></i> Ver Resultados
                     </button>
                 </div>
-            </div>
-            
-            <div id="panelCapas" class="layers-container">
-                <div class="no-layers">
-                    <i class="fas fa-info-circle"></i>
-                    <p>No hay capas cargadas</p>
-                </div>
-                <ul id="listaCapas"></ul>
             </div>
         </div>
     </div>
