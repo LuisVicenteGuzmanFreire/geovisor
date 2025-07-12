@@ -158,7 +158,7 @@ const agregarMarcadorUbicacion = (lat, lng, precision) => {
     marcadorUbicacion = L.marker([lat, lng], { icon: iconoGPS }).addTo(map);
     
     // Crear popup con información
-    const utm = convertirLatLngAutm(lat, lng);
+    const infoUTM = obtenerInfoZonaUTM(lat, lng);
     const dms = convertirAFormatoGoogleMaps(lat, lng);
     const timestamp = new Date().toLocaleString();
     
@@ -168,9 +168,9 @@ const agregarMarcadorUbicacion = (lat, lng, precision) => {
             <b>DMS:</b> ${dms.format}<br>
             <b>Decimal:</b> ${lat.toFixed(6)}°, ${lng.toFixed(6)}°<br><br>
             <b>🗺️ Coordenadas UTM:</b><br>
-            <b>Zona:</b> ${utm.zone}<br>
-            <b>Este:</b> ${utm.easting} m<br>
-            <b>Norte:</b> ${utm.northing} m<br><br>
+            <b>Zona:</b> ${infoUTM.zoneString}<br>
+            <b>Este:</b> ${infoUTM.easting.toFixed(2)} m<br>
+            <b>Norte:</b> ${infoUTM.northing.toFixed(2)} m<br><br>
             <b>📊 Información del GPS:</b><br>
             <b>Precisión:</b> ±${Math.round(precision)} metros<br>
             <b>Timestamp:</b> ${timestamp}
@@ -199,11 +199,11 @@ const actualizarCamposCoordenadas = (lat, lng) => {
     document.getElementById('lonInput').value = lng.toFixed(6);
     
     // Convertir a UTM y actualizar esos campos también
-    const utm = convertirLatLngAutm(lat, lng);
-    document.getElementById('utmEste').value = parseFloat(utm.easting).toFixed(2);
-    document.getElementById('utmNorte').value = parseFloat(utm.northing).toFixed(2);
-    document.getElementById('utmZona').value = utm.zone.slice(0, -1); // Quitar N/S
-    document.getElementById('utmHemisferio').value = utm.zone.slice(-1); // Solo N/S
+    const infoUTM = obtenerInfoZonaUTM(lat, lng);
+    document.getElementById('utmEste').value = infoUTM.easting.toFixed(2);
+    document.getElementById('utmNorte').value = infoUTM.northing.toFixed(2);
+    document.getElementById('utmZona').value = infoUTM.zone; // Número de zona
+    document.getElementById('utmHemisferio').value = infoUTM.hemisphere; // N/S
     
     // Asegurar que está en modo Lat/Lon
     document.getElementById('tipoCoordenadas').value = 'latlon';

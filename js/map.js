@@ -372,9 +372,9 @@ const inicializarMapa = () => {
         tooltipMedidas.setContent(contenido);
     });
 
-    // === FUNCIÓN AUXILIAR PARA POPUP DE MARCADORES ===
+    // === FUNCIÓN AUXILIAR PARA POPUP DE MARCADORES - MEJORADO CON CRS REGIONAL ===
     const crearPopupMarcador = (latlng, tipoMarcador = 'Marcador') => {
-        const utm = convertirLatLngAutm(latlng.lat, latlng.lng);
+        const infoUTM = obtenerInfoZonaUTM(latlng.lat, latlng.lng);
         const dms = convertirAFormatoGoogleMaps(latlng.lat, latlng.lng);
         const copyId = `copy-marker-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
         
@@ -382,16 +382,24 @@ const inicializarMapa = () => {
         const tipo = tipoMarcador === 'CircleMarker' ? 'Marcador Circular' : 'Marcador';
         const icono = tipoMarcador === 'CircleMarker' ? '🔵' : '📍';
         
+        // Información contextual regional
+        let contextoRegional = '';
+        if (infoUTM.esEcuador) {
+            contextoRegional = infoUTM.esGalapagos ? 'Islas Galápagos' : 'Ecuador Continental';
+        }
+        
         const textoCopia = `Tipo\t${tipo} Dibujado
 Latitud (DMS)\t${dms.latitude}
 Longitud (DMS)\t${dms.longitude}
 Latitud (Decimal)\t${latlng.lat.toFixed(6)}
 Longitud (Decimal)\t${latlng.lng.toFixed(6)}
 Sistema Geográfico\tWGS84 (EPSG:4326)
-UTM Zona\t${utm.zone}
-UTM Este\t${utm.easting}
-UTM Norte\t${utm.northing}
-Sistema UTM\t${utm.epsg}`;
+UTM Zona\t${infoUTM.zoneString}
+UTM Este\t${infoUTM.easting.toFixed(2)}
+UTM Norte\t${infoUTM.northing.toFixed(2)}
+Sistema UTM\t${infoUTM.epsg}
+Región\t${contextoRegional || 'Internacional'}
+CRS Recomendado\t${infoUTM.recomendacion}`;
 
         return `
             <div style="font-family: monospace; font-size: 13px; max-width: 280px;">
@@ -408,10 +416,10 @@ Sistema UTM\t${utm.epsg}`;
                 <b>Decimal:</b> ${latlng.lat.toFixed(6)}°, ${latlng.lng.toFixed(6)}°<br>
                 <b>Sistema:</b> WGS84 (EPSG:4326)<br><br>
                 <b>🗺️ Coordenadas UTM:</b><br>
-                <b>Zona:</b> ${utm.zone}<br>
-                <b>Este:</b> ${utm.easting} m<br>
-                <b>Norte:</b> ${utm.northing} m<br>
-                <b>Sistema:</b> ${utm.epsg}
+                <b>Zona:</b> ${infoUTM.zoneString}<br>
+                <b>Este:</b> ${infoUTM.easting.toFixed(2)} m<br>
+                <b>Norte:</b> ${infoUTM.northing.toFixed(2)} m<br>
+                <b>Sistema:</b> ${infoUTM.epsg}
             </div>
         `;
     };
@@ -452,17 +460,29 @@ Sistema UTM\t${utm.epsg}`;
         }
     });
 
-    // Mostrar coordenadas en tiempo real (Lat/Lon, UTM y EPSG) con debounce
+    // Mostrar coordenadas en tiempo real (Lat/Lon, UTM y EPSG) con debounce - MEJORADO CON CRS REGIONAL
     const actualizarCoordenadas = debounce((e) => {
         const { lat, lng } = e.latlng;
-        const utm = convertirLatLngAutm(lat, lng);
+        
+        // Usar el nuevo sistema de proyecciones regional
+        const infoUTM = obtenerInfoZonaUTM(lat, lng);
 
         document.getElementById("latlon").innerText = `Lat: ${lat.toFixed(6)}, Lng: ${lng.toFixed(6)}`;
-        document.getElementById("utm").innerText = `UTM: Zona ${utm.zone}, Este ${utm.easting}, Norte ${utm.northing}`;
-        document.getElementById("epsg").innerText = `${utm.epsg}`;
+        document.getElementById("utm").innerText = `UTM: Zona ${infoUTM.zoneString}, Este ${infoUTM.easting.toFixed(2)}, Norte ${infoUTM.northing.toFixed(2)}`;
         
-        // Actualizar status
-        document.getElementById('mapStatus').textContent = 'Explorando';
+        // Mostrar información contextual sobre el sistema de coordenadas
+        let epsgText = infoUTM.epsg;
+        if (infoUTM.esEcuador) {
+            epsgText += infoUTM.esGalapagos ? ' (Galápagos)' : ' (Ecuador)';
+        }
+        document.getElementById("epsg").innerText = epsgText;
+        
+        // Actualizar status con información regional
+        let status = 'Explorando';
+        if (infoUTM.esEcuador) {
+            status += infoUTM.esGalapagos ? ' - Galápagos' : ' - Ecuador';
+        }
+        document.getElementById('mapStatus').textContent = status;
     }, 100); // Debounce de 100ms
 
     map.on("mousemove", actualizarCoordenadas);
@@ -538,8 +558,8 @@ Sistema UTM\t${utm.epsg}`;
             }
         
             if (!isNaN(lat) && !isNaN(lng)) {
-                // Convertir las coordenadas ingresadas a UTM
-                const utm = convertirLatLngAutm(lat, lng);
+                // Convertir las coordenadas ingresadas a UTM usando el sistema regional
+                const infoUTM = obtenerInfoZonaUTM(lat, lng);
                 const dms = convertirAFormatoGoogleMaps(lat, lng);
                 
                 // Crear texto para Excel (separado por tabulaciones)
@@ -550,10 +570,10 @@ Longitud (DMS)\t${dms.longitude}
 Latitud (Decimal)\t${lat.toFixed(6)}
 Longitud (Decimal)\t${lng.toFixed(6)}
 Sistema Geográfico\tWGS84 (EPSG:4326)
-UTM Zona\t${utm.zone}
-UTM Este\t${utm.easting}
-UTM Norte\t${utm.northing}
-Sistema UTM\t${utm.epsg}`;
+UTM Zona\t${infoUTM.zoneString}
+UTM Este\t${infoUTM.easting.toFixed(2)}
+UTM Norte\t${infoUTM.northing.toFixed(2)}
+Sistema UTM\t${infoUTM.epsg}`;
         
                 // Crear el contenido del popup homogenizado
                 const contenidoNavegacion = `
@@ -563,10 +583,10 @@ Sistema UTM\t${utm.epsg}`;
                         <b>Decimal:</b> ${lat.toFixed(6)}°, ${lng.toFixed(6)}°<br>
                         <b>Sistema:</b> WGS84 (EPSG:4326)<br><br>
                         <b>🗺️ Coordenadas UTM:</b><br>
-                        <b>Zona:</b> ${utm.zone}<br>
-                        <b>Este:</b> ${utm.easting} m<br>
-                        <b>Norte:</b> ${utm.northing} m<br>
-                        <b>Sistema:</b> ${utm.epsg}
+                        <b>Zona:</b> ${infoUTM.zoneString}<br>
+                        <b>Este:</b> ${infoUTM.easting.toFixed(2)} m<br>
+                        <b>Norte:</b> ${infoUTM.northing.toFixed(2)} m<br>
+                        <b>Sistema:</b> ${infoUTM.epsg}
                     </div>
                 `;
                 
@@ -615,8 +635,8 @@ Sistema UTM\t${utm.epsg}`;
                 // Obtener la primera coincidencia
                 const { lat, lon, display_name } = data[0];
     
-                // Convertir Lat/Lon a UTM
-                const utm = convertirLatLngAutm(parseFloat(lat), parseFloat(lon));
+                // Convertir Lat/Lon a UTM usando el sistema regional
+                const infoUTM = obtenerInfoZonaUTM(parseFloat(lat), parseFloat(lon));
                 const dms = convertirAFormatoGoogleMaps(parseFloat(lat), parseFloat(lon));
                 
                 // Crear texto para Excel (separado por tabulaciones)
@@ -628,10 +648,10 @@ Longitud (DMS)\t${dms.longitude}
 Latitud (Decimal)\t${parseFloat(lat).toFixed(6)}
 Longitud (Decimal)\t${parseFloat(lon).toFixed(6)}
 Sistema Geográfico\tWGS84 (EPSG:4326)
-UTM Zona\t${utm.zone}
-UTM Este\t${utm.easting}
-UTM Norte\t${utm.northing}
-Sistema UTM\t${utm.epsg}`;
+UTM Zona\t${infoUTM.zoneString}
+UTM Este\t${infoUTM.easting.toFixed(2)}
+UTM Norte\t${infoUTM.northing.toFixed(2)}
+Sistema UTM\t${infoUTM.epsg}`;
     
                 // Crear contenido del popup homogenizado
                 const contenidoDireccion = `
@@ -645,10 +665,10 @@ Sistema UTM\t${utm.epsg}`;
                         <b>Decimal:</b> ${parseFloat(lat).toFixed(6)}°, ${parseFloat(lon).toFixed(6)}°<br>
                         <b>Sistema:</b> WGS84 (EPSG:4326)<br><br>
                         <b>🗺️ Coordenadas UTM:</b><br>
-                        <b>Zona:</b> ${utm.zone}<br>
-                        <b>Este:</b> ${utm.easting} m<br>
-                        <b>Norte:</b> ${utm.northing} m<br>
-                        <b>Sistema:</b> ${utm.epsg}
+                        <b>Zona:</b> ${infoUTM.zoneString}<br>
+                        <b>Este:</b> ${infoUTM.easting.toFixed(2)} m<br>
+                        <b>Norte:</b> ${infoUTM.northing.toFixed(2)} m<br>
+                        <b>Sistema:</b> ${infoUTM.epsg}
                     </div>
                 `;
                 

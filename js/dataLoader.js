@@ -39,16 +39,16 @@ const formatearInformacionAtributiva = (feature, nombreCapa) => {
     // Agregar información geométrica
     if (geometry.type === 'Point') {
         const [lng, lat] = geometry.coordinates;
-        const utm = convertirLatLngAutm(lat, lng);
+        const infoUTM = obtenerInfoZonaUTM(lat, lng);
         const dms = convertirAFormatoGoogleMaps(lat, lng);
         textoCopia += `Latitud (DMS)\t${dms.latitude}\n`;
         textoCopia += `Longitud (DMS)\t${dms.longitude}\n`;
         textoCopia += `Latitud (Decimal)\t${lat.toFixed(6)}\n`;
         textoCopia += `Longitud (Decimal)\t${lng.toFixed(6)}\n`;
-        textoCopia += `UTM Zona\t${utm.zone}\n`;
-        textoCopia += `UTM Este\t${utm.easting}\n`;
-        textoCopia += `UTM Norte\t${utm.northing}\n`;
-        textoCopia += `EPSG\t${utm.epsg}\n`;
+        textoCopia += `UTM Zona\t${infoUTM.zoneString}\n`;
+        textoCopia += `UTM Este\t${infoUTM.easting.toFixed(2)}\n`;
+        textoCopia += `UTM Norte\t${infoUTM.northing.toFixed(2)}\n`;
+        textoCopia += `EPSG\t${infoUTM.epsg}\n`;
     } else if (geometry.type === 'Polygon') {
         const area = turf.area(feature);
         const polygon = turf.polygon(geometry.coordinates);
@@ -104,16 +104,16 @@ const formatearInformacionAtributiva = (feature, nombreCapa) => {
     // Agregar coordenadas dependiendo del tipo
     if (geometry.type === 'Point') {
         const [lng, lat] = geometry.coordinates;
-        const utm = convertirLatLngAutm(lat, lng);
+        const infoUTM = obtenerInfoZonaUTM(lat, lng);
         const dms = convertirAFormatoGoogleMaps(lat, lng);
         content += `
             <b>📍 Coordenadas Geográficas:</b><br>
             <b>DMS:</b> ${dms.format}<br>
             <b>Decimal:</b> ${lat.toFixed(6)}°, ${lng.toFixed(6)}°<br>
             <b>📍 Coordenadas UTM:</b><br>
-            <b>Zona:</b> ${utm.zone}<br>
-            <b>Este:</b> ${utm.easting} m<br>
-            <b>Norte:</b> ${utm.northing} m
+            <b>Zona:</b> ${infoUTM.zoneString}<br>
+            <b>Este:</b> ${infoUTM.easting.toFixed(2)} m<br>
+            <b>Norte:</b> ${infoUTM.northing.toFixed(2)} m
         `;
     } else if (geometry.type === 'Polygon') {
         // Calcular área y perímetro
@@ -1545,7 +1545,7 @@ const crearDatosTablaConElevaciones = (features, coordenadasMap, elevaciones) =>
         
         if (geometry.type === 'Point') {
             const [lng, lat] = geometry.coordinates;
-            const utm = convertirLatLngAutm(lat, lng);
+            const utm = obtenerInfoZonaUTM(lat, lng);
             const key = `${lat.toFixed(6)},${lng.toFixed(6)}`;
             const elevacion = elevaciones[coordenadasMap.get(key)] || 0;
             
@@ -1556,9 +1556,9 @@ const crearDatosTablaConElevaciones = (features, coordenadasMap, elevaciones) =>
                 lat.toFixed(5),                    // Latitud
                 lng.toFixed(5),                    // Longitud
                 Math.round(elevacion),             // Elevación
-                parseFloat(utm.easting).toFixed(2), // UTMX
-                parseFloat(utm.northing).toFixed(2), // UTMY
-                utm.zone,                          // Zona UTM
+                utm.easting.toFixed(2), // UTMX
+                utm.northing.toFixed(2), // UTMY
+                utm.zoneString,                          // Zona UTM
                 '-'                                // Distancia (N/A para puntos)
             ]);
             
@@ -1567,7 +1567,7 @@ const crearDatosTablaConElevaciones = (features, coordenadasMap, elevaciones) =>
             
             coords.forEach((coord, vertexIndex) => {
                 const [lng, lat] = coord;
-                const utm = convertirLatLngAutm(lat, lng);
+                const utm = obtenerInfoZonaUTM(lat, lng);
                 const key = `${lat.toFixed(6)},${lng.toFixed(6)}`;
                 const elevacion = elevaciones[coordenadasMap.get(key)] || 0;
                 
@@ -1587,9 +1587,9 @@ const crearDatosTablaConElevaciones = (features, coordenadasMap, elevaciones) =>
                     lat.toFixed(5),                    // Latitud
                     lng.toFixed(5),                    // Longitud
                     Math.round(elevacion),             // Elevación
-                    parseFloat(utm.easting).toFixed(2), // UTMX
-                    parseFloat(utm.northing).toFixed(2), // UTMY
-                    utm.zone,                          // Zona UTM
+                    utm.easting.toFixed(2), // UTMX
+                    utm.northing.toFixed(2), // UTMY
+                    utm.zoneString,                          // Zona UTM
                     distancia                          // Distancia al vértice anterior
                 ]);
             });
@@ -1602,7 +1602,7 @@ const crearDatosTablaConElevaciones = (features, coordenadasMap, elevaciones) =>
             
             vertices.forEach((coord, vertexIndex) => {
                 const [lng, lat] = coord;
-                const utm = convertirLatLngAutm(lat, lng);
+                const utm = obtenerInfoZonaUTM(lat, lng);
                 const key = `${lat.toFixed(6)},${lng.toFixed(6)}`;
                 const elevacion = elevaciones[coordenadasMap.get(key)] || 0;
                 
@@ -1628,9 +1628,9 @@ const crearDatosTablaConElevaciones = (features, coordenadasMap, elevaciones) =>
                     lat.toFixed(5),                    // Latitud
                     lng.toFixed(5),                    // Longitud
                     Math.round(elevacion),             // Elevación
-                    parseFloat(utm.easting).toFixed(2), // UTMX
-                    parseFloat(utm.northing).toFixed(2), // UTMY
-                    utm.zone,                          // Zona UTM
+                    utm.easting.toFixed(2), // UTMX
+                    utm.northing.toFixed(2), // UTMY
+                    utm.zoneString,                          // Zona UTM
                     distancia                          // Distancia entre vértices
                 ]);
             });
@@ -1659,7 +1659,7 @@ const crearDatosTabla = (features) => {
         
         if (geometry.type === 'Point') {
             const [lng, lat] = geometry.coordinates;
-            const utm = convertirLatLngAutm(lat, lng);
+            const utm = obtenerInfoZonaUTM(lat, lng);
             
             datos.push([
                 geometryId,                        // #
@@ -1668,9 +1668,9 @@ const crearDatosTabla = (features) => {
                 lat.toFixed(5),                    // Latitud
                 lng.toFixed(5),                    // Longitud
                 0,                                 // Elevación (placeholder)
-                parseFloat(utm.easting).toFixed(2), // UTMX
-                parseFloat(utm.northing).toFixed(2), // UTMY
-                utm.zone,                          // Zona UTM
+                utm.easting.toFixed(2), // UTMX
+                utm.northing.toFixed(2), // UTMY
+                utm.zoneString,                          // Zona UTM
                 '-'                                // Distancia (N/A para puntos)
             ]);
             
@@ -1679,7 +1679,7 @@ const crearDatosTabla = (features) => {
             
             coords.forEach((coord, vertexIndex) => {
                 const [lng, lat] = coord;
-                const utm = convertirLatLngAutm(lat, lng);
+                const utm = obtenerInfoZonaUTM(lat, lng);
                 
                 // Calcular distancia al vértice anterior
                 let distancia = '-';
@@ -1697,9 +1697,9 @@ const crearDatosTabla = (features) => {
                     lat.toFixed(5),                    // Latitud
                     lng.toFixed(5),                    // Longitud
                     0,                                 // Elevación (placeholder)
-                    parseFloat(utm.easting).toFixed(2), // UTMX
-                    parseFloat(utm.northing).toFixed(2), // UTMY
-                    utm.zone,                          // Zona UTM
+                    utm.easting.toFixed(2), // UTMX
+                    utm.northing.toFixed(2), // UTMY
+                    utm.zoneString,                          // Zona UTM
                     distancia                          // Distancia al vértice anterior
                 ]);
             });
@@ -1712,7 +1712,7 @@ const crearDatosTabla = (features) => {
             
             vertices.forEach((coord, vertexIndex) => {
                 const [lng, lat] = coord;
-                const utm = convertirLatLngAutm(lat, lng);
+                const utm = obtenerInfoZonaUTM(lat, lng);
                 
                 // Calcular distancia al vértice anterior (o al último para cerrar el polígono)
                 let distancia = '-';
@@ -1736,9 +1736,9 @@ const crearDatosTabla = (features) => {
                     lat.toFixed(5),                    // Latitud
                     lng.toFixed(5),                    // Longitud
                     0,                                 // Elevación (placeholder)
-                    parseFloat(utm.easting).toFixed(2), // UTMX
-                    parseFloat(utm.northing).toFixed(2), // UTMY
-                    utm.zone,                          // Zona UTM
+                    utm.easting.toFixed(2), // UTMX
+                    utm.northing.toFixed(2), // UTMY
+                    utm.zoneString,                          // Zona UTM
                     distancia                          // Distancia entre vértices
                 ]);
             });

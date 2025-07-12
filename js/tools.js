@@ -1,21 +1,5 @@
-const convertirLatLngAutm = (lat, lng) => {
-    const zona = Math.floor((lng + 180) / 6) + 1;
-    const hemisferio = lat >= 0 ? "N" : "S";
-    const epsgCode = lat >= 0 ? `EPSG:326${zona}` : `EPSG:327${zona}`; // EPSG 326XX para el hemisferio norte, 327XX para el sur
-
-    const projDef = `+proj=utm +zone=${zona} ${hemisferio === "S" ? "+south" : ""} +datum=WGS84 +units=m +no_defs`;
-    const utmCoords = proj4(projDef, [lng, lat]);
-
-    return {
-        easting: utmCoords[0].toFixed(2),
-        northing: utmCoords[1].toFixed(2),
-        zone: `${zona}${hemisferio}`,
-        epsg: epsgCode
-    };
-};
-
-// Hacer la función accesible globalmente
-window.convertirLatLngAutm = convertirLatLngAutm;
+// La función convertirLatLngAutm ahora es proporcionada por projections.js
+// que incluye soporte para CRS regionales de Ecuador
 
 // Función debounce para optimizar rendimiento
 const debounce = (func, wait) => {
