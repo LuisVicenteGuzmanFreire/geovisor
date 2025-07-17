@@ -1480,6 +1480,857 @@ html, body {
 }
 
 
+/* ===== DASHBOARD STYLES ===== */
+/* Overlay para el modal */
+.dashboard-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    z-index: 1001;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dashboard-overlay.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.dashboard-panel {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.9);
+    width: 90vw;
+    max-width: 1200px;
+    height: 85vh;
+    max-height: 900px;
+    background: var(--surface-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-xl);
+    z-index: 1002;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+    opacity: 0;
+    visibility: hidden;
+}
+
+.dashboard-panel.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.dashboard-panel.animated {
+    animation: dashboardModalIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes dashboardModalIn {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+.dashboard-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: var(--gradient-primary);
+    color: white;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.dashboard-header h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.dashboard-close {
+    background: rgba(255,255,255,0.2);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: white;
+    padding: 6px 10px;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-size: 14px;
+    transition: var(--transition);
+}
+
+.dashboard-close:hover {
+    background: rgba(255,255,255,0.3);
+    transform: translateY(-1px);
+}
+
+.dashboard-tabs {
+    display: flex;
+    background: var(--background-secondary);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.dashboard-tab {
+    flex: 1;
+    padding: 10px 8px;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    border-bottom: 2px solid transparent;
+}
+
+.dashboard-tab:hover {
+    background: var(--surface-hover);
+    color: var(--text-primary);
+}
+
+.dashboard-tab.active {
+    background: var(--surface-color);
+    color: var(--primary-color);
+    border-bottom-color: var(--primary-color);
+}
+
+.dashboard-tab i {
+    font-size: 14px;
+}
+
+.dashboard-content {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    max-height: calc(85vh - 160px);
+}
+
+.dashboard-tab-content {
+    display: none;
+    padding: 16px;
+    height: auto;
+    min-height: 100%;
+}
+
+.dashboard-tab-content.active {
+    display: block;
+}
+
+.dashboard-section {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* Stats Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+/* Indicador visual de scroll */
+.dashboard-content {
+    position: relative;
+}
+
+.dashboard-content::before {
+    content: '';
+    position: sticky;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--primary-color), transparent);
+    opacity: 0;
+    transition: var(--transition);
+    z-index: 10;
+}
+
+.dashboard-content.scrolled::before {
+    opacity: 1;
+}
+
+.stat-card {
+    background: var(--gradient-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+}
+
+.stat-card:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
+}
+
+.stat-icon {
+    width: 32px;
+    height: 32px;
+    background: var(--gradient-primary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 14px;
+}
+
+.stat-content {
+    flex: 1;
+}
+
+.stat-value {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-primary);
+    line-height: 1;
+}
+
+.stat-label {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-top: 2px;
+}
+
+/* Metrics Grid */
+.metrics-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.metric-card {
+    background: var(--gradient-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 12px;
+    box-shadow: var(--shadow);
+}
+
+.metric-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 12px;
+}
+
+.metric-header i {
+    color: var(--primary-color);
+}
+
+.metric-values {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.metric-value {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    background: var(--background-secondary);
+    padding: 4px 8px;
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-light);
+}
+
+.metric-value .value {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 12px;
+}
+
+.metric-value .unit {
+    font-size: 10px;
+    color: var(--text-secondary);
+}
+
+/* Chart Container */
+.chart-container {
+    background: var(--gradient-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 16px;
+    box-shadow: var(--shadow);
+}
+
+.chart-container h4 {
+    margin: 0 0 12px 0;
+    font-size: 13px;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.chart-container h4 i {
+    color: var(--primary-color);
+}
+
+.chart-container canvas {
+    max-height: 200px !important;
+    height: 200px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+/* Attributes Styles */
+.attributes-summary {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.summary-card {
+    background: var(--gradient-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 12px;
+    box-shadow: var(--shadow);
+}
+
+.summary-card h4 {
+    margin: 0 0 8px 0;
+    font-size: 13px;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.field-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.field-tag {
+    background: var(--primary-color);
+    color: white;
+    padding: 2px 6px;
+    border-radius: var(--border-radius);
+    font-size: 10px;
+    font-weight: 500;
+}
+
+.attributes-detail {
+    background: var(--gradient-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 12px;
+    box-shadow: var(--shadow);
+}
+
+.attributes-detail h4 {
+    margin: 0 0 8px 0;
+    font-size: 13px;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.field-analysis {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.field-analysis-item {
+    background: var(--background-secondary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--border-radius);
+    padding: 8px;
+}
+
+.field-name {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 12px;
+    margin-bottom: 4px;
+}
+
+.field-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 10px;
+    color: var(--text-secondary);
+}
+
+.field-stats span {
+    background: var(--surface-color);
+    padding: 2px 6px;
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+}
+
+/* Activity Styles */
+.activity-summary {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 16px;
+    background: var(--gradient-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 12px;
+    box-shadow: var(--shadow);
+}
+
+.activity-stat {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.activity-stat i {
+    color: var(--primary-color);
+    width: 16px;
+    text-align: center;
+}
+
+.activity-stat strong {
+    color: var(--text-primary);
+}
+
+/* Scroll personalizado para dashboard */
+.dashboard-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.dashboard-content::-webkit-scrollbar-track {
+    background: var(--background-secondary);
+    border-radius: var(--border-radius);
+}
+
+.dashboard-content::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: var(--border-radius);
+    transition: var(--transition);
+}
+
+.dashboard-content::-webkit-scrollbar-thumb:hover {
+    background: var(--text-secondary);
+}
+
+/* Dashboard Actions */
+.dashboard-actions {
+    display: flex;
+    gap: 8px;
+    padding: 12px 16px;
+    background: var(--background-secondary);
+    border-top: 1px solid var(--border-color);
+    flex-shrink: 0;
+}
+
+.dashboard-btn {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.dashboard-btn.primary {
+    background: var(--gradient-primary);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.dashboard-btn.primary:hover {
+    background: var(--primary-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow);
+}
+
+.dashboard-btn.secondary {
+    background: var(--surface-color);
+    color: var(--text-primary);
+}
+
+.dashboard-btn.secondary:hover {
+    background: var(--surface-hover);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow);
+}
+
+/* Field Selector Styles */
+.field-selector-card {
+    background: var(--gradient-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 16px;
+    margin-bottom: 16px;
+    box-shadow: var(--shadow);
+}
+
+.field-selector-card h4 {
+    margin: 0 0 12px 0;
+    font-size: 14px;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.field-selector-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.selector-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.selector-row label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    min-width: 60px;
+}
+
+.layer-select-stats,
+.field-select-stats {
+    flex: 1;
+    padding: 6px 8px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    font-size: 12px;
+    background: var(--surface-color);
+    color: var(--text-primary);
+    outline: none;
+    transition: var(--transition);
+}
+
+.layer-select-stats:focus,
+.field-select-stats:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.stats-results {
+    margin-top: 12px;
+}
+
+.stats-grid-detailed {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.stat-detail-card {
+    background: var(--background-secondary);
+    border: 1px solid var(--border-light);
+    border-radius: var(--border-radius);
+    padding: 8px;
+    text-align: center;
+}
+
+.stat-detail-label {
+    font-size: 10px;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+}
+
+.stat-detail-value {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.numeric-stats {
+    margin-bottom: 12px;
+}
+
+.numeric-stats h5 {
+    font-size: 12px;
+    color: var(--text-primary);
+    margin: 0 0 8px 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.stats-grid-numeric {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+}
+
+.stat-numeric-card {
+    background: var(--surface-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 6px;
+    text-align: center;
+}
+
+.stat-numeric-label {
+    font-size: 9px;
+    color: var(--text-secondary);
+    margin-bottom: 2px;
+}
+
+.stat-numeric-value {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--primary-color);
+}
+
+.frequent-values {
+    margin-bottom: 12px;
+}
+
+.frequent-values h5 {
+    font-size: 12px;
+    color: var(--text-primary);
+    margin: 0 0 8px 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.frequent-list {
+    max-height: 120px;
+    overflow-y: auto;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    background: var(--surface-color);
+}
+
+/* Scroll personalizado para frequent-list */
+.frequent-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.frequent-list::-webkit-scrollbar-track {
+    background: var(--background-secondary);
+    border-radius: var(--border-radius);
+}
+
+.frequent-list::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: var(--border-radius);
+}
+
+.frequent-list::-webkit-scrollbar-thumb:hover {
+    background: var(--text-secondary);
+}
+
+.frequent-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 8px;
+    border-bottom: 1px solid var(--border-light);
+    font-size: 11px;
+}
+
+.frequent-item:last-child {
+    border-bottom: none;
+}
+
+.frequent-value {
+    color: var(--text-primary);
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-right: 8px;
+}
+
+.frequent-count {
+    color: var(--primary-color);
+    font-weight: 600;
+    background: var(--background-secondary);
+    padding: 2px 6px;
+    border-radius: var(--border-radius);
+    min-width: 30px;
+    text-align: center;
+}
+
+/* Symbology Controls */
+.symbology-controls {
+    background: var(--gradient-surface);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    padding: 16px;
+    margin-top: 12px;
+    box-shadow: var(--shadow);
+}
+
+.symbology-controls h5 {
+    margin: 0 0 12px 0;
+    font-size: 13px;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.symbology-controls h5 i {
+    color: var(--primary-color);
+}
+
+.symbology-options {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.symbology-btn {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid var(--primary-color);
+    background: var(--primary-color);
+    color: white;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 500;
+    transition: var(--transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.symbology-btn:hover {
+    background: var(--primary-hover);
+    transform: translateY(-1px);
+}
+
+.symbology-btn.secondary {
+    background: transparent;
+    color: var(--primary-color);
+}
+
+.symbology-btn.secondary:hover {
+    background: var(--primary-color);
+    color: white;
+}
+
+.color-legend {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.legend-title {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid var(--border-light);
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 0;
+    font-size: 10px;
+}
+
+.legend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+    border: 1px solid var(--border-color);
+    flex-shrink: 0;
+}
+
+.legend-label {
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .dashboard-panel {
+        width: 95vw;
+        height: 90vh;
+        max-width: none;
+        max-height: none;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .stats-grid-detailed {
+        grid-template-columns: 1fr;
+    }
+    
+    .stats-grid-numeric {
+        grid-template-columns: 1fr;
+    }
+    
+    .chart-container canvas {
+        max-height: 150px;
+    }
+    
+    .selector-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .selector-row label {
+        min-width: auto;
+    }
+    
+    .dashboard-content {
+        max-height: calc(100vh - var(--navbar-height) - var(--status-bar-height) - 100px);
+    }
+}
+
 /* ===== MODAL DE INFORMACIÓN ===== */
 .info-modal-overlay {
     position: fixed;
@@ -2626,6 +3477,200 @@ html, body {
         text-align: center;
         justify-content: center;
     }
+}
+
+/* ===== ESTILOS ESPECÍFICOS PARA GEOTIFF ===== */
+
+/* Iconos específicos para diferentes tipos de capa */
+.layer-icon {
+    margin-right: 8px;
+    font-size: 14px;
+    min-width: 16px;
+}
+
+/* Estilo específico para capas GeoTIFF */
+li[data-layer-name] .layer-icon {
+    color: #8b5cf6; /* Color morado para GeoTIFF */
+}
+
+/* Control de opacidad mejorado */
+.opacity-slider {
+    width: 60px;
+    height: 4px;
+    background: var(--border-color);
+    border-radius: 2px;
+    outline: none;
+    margin-right: 8px;
+    cursor: pointer;
+}
+
+.opacity-slider::-webkit-slider-thumb {
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    background: var(--primary-color);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: var(--transition-fast);
+}
+
+.opacity-slider::-webkit-slider-thumb:hover {
+    background: var(--primary-hover);
+    transform: scale(1.1);
+}
+
+.opacity-slider::-moz-range-thumb {
+    width: 14px;
+    height: 14px;
+    background: var(--primary-color);
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+    transition: var(--transition-fast);
+}
+
+.opacity-slider::-moz-range-thumb:hover {
+    background: var(--primary-hover);
+    transform: scale(1.1);
+}
+
+.opacity-label {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    font-weight: 500;
+    min-width: 30px;
+    text-align: center;
+}
+
+/* Controles izquierdos de la capa */
+.layer-controls-left {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.layer-controls-right {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Información de carga de GeoTIFF */
+.geotiff-loading {
+    background: linear-gradient(90deg, var(--surface-color) 25%, var(--background-secondary) 50%, var(--surface-color) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: var(--border-radius);
+    padding: 12px;
+    margin: 8px 0;
+}
+
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+/* Indicador de progreso para GeoTIFF */
+.geotiff-progress {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: var(--surface-color);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    margin: 8px 0;
+}
+
+.geotiff-progress-bar {
+    flex: 1;
+    height: 4px;
+    background: var(--background-secondary);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.geotiff-progress-fill {
+    height: 100%;
+    background: var(--primary-color);
+    border-radius: 2px;
+    transition: width 0.3s ease;
+}
+
+/* Estilo mejorado para detalles de capa */
+.layer-details {
+    margin-top: 4px;
+    color: var(--text-tertiary);
+    font-size: 11px;
+    line-height: 1.2;
+}
+
+.layer-details small {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Hover effect para capas GeoTIFF */
+li[data-layer-name]:hover {
+    background: var(--surface-hover);
+    border-color: var(--border-dark);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow);
+}
+
+/* Estado de carga para botón GeoTIFF */
+.file-btn.loading {
+    pointer-events: none;
+    opacity: 0.7;
+    position: relative;
+}
+
+.file-btn.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 16px;
+    height: 16px;
+    margin: -8px 0 0 -8px;
+    border: 2px solid transparent;
+    border-top: 2px solid currentColor;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Información específica de GeoTIFF en popup */
+.geotiff-info-section {
+    background: var(--background-secondary);
+    padding: 12px;
+    border-radius: var(--border-radius);
+    margin: 8px 0;
+    border-left: 4px solid var(--primary-color);
+}
+
+.geotiff-metadata {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 8px 16px;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.geotiff-metadata .label {
+    font-weight: 600;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+.geotiff-metadata .value {
+    color: var(--text-primary);
+    font-family: 'Courier New', monospace;
 }
 
 /* ===== MEJORAS RESPONSIVAS ===== */

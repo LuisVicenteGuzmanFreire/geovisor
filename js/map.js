@@ -375,7 +375,7 @@ const inicializarMapa = () => {
     // === FUNCIÓN HELPER PARA OBTENER INFO UTM CON FALLBACK ===
     const obtenerInfoUTMConFallback = (lat, lng) => {
         if (typeof obtenerInfoZonaUTM === 'function') {
-            return obtenerInfoUTMConFallback(lat, lng);
+            return obtenerInfoZonaUTM(lat, lng);
         } else {
             // Fallback al sistema básico
             const zona = Math.floor((lng + 180) / 6) + 1;
@@ -847,17 +847,38 @@ Sistema UTM\t${infoUTM.epsg}`;
             console.log(`📂 Capas en grupo después: ${capasEnGrupoDespues}`);
         }
 
-        if (geometriasEliminadas > 0) {
+        // Limpiar también capas GeoTIFF si están disponibles
+        let geoTIFFsEliminados = 0;
+        if (window.limpiarGeoTIFFs && typeof window.limpiarGeoTIFFs === 'function') {
+            const geoTIFFsAntes = Object.keys(window.geoTIFFLayers || {}).length;
+            window.limpiarGeoTIFFs();
+            const geoTIFFsDespues = Object.keys(window.geoTIFFLayers || {}).length;
+            geoTIFFsEliminados = geoTIFFsAntes - geoTIFFsDespues;
+            console.log(`🖼️ GeoTIFFs eliminados: ${geoTIFFsEliminados}`);
+        }
+
+        const totalEliminado = geometriasEliminadas + geoTIFFsEliminados;
+        
+        if (totalEliminado > 0) {
+            let mensaje = '';
+            if (geometriasEliminadas > 0 && geoTIFFsEliminados > 0) {
+                mensaje = `Se eliminaron ${geometriasEliminadas} geometrías y ${geoTIFFsEliminados} GeoTIFFs`;
+            } else if (geometriasEliminadas > 0) {
+                mensaje = `Se eliminaron ${geometriasEliminadas} geometrías dibujadas`;
+            } else if (geoTIFFsEliminados > 0) {
+                mensaje = `Se eliminaron ${geoTIFFsEliminados} capas GeoTIFF`;
+            }
+            
             if (typeof mostrarMensaje === 'function') {
-                mostrarMensaje(`Se eliminaron ${geometriasEliminadas} geometrías dibujadas`, 'success');
+                mostrarMensaje(mensaje, 'success');
             }
             const statusElement = document.getElementById('mapStatus');
             if (statusElement) {
-                statusElement.textContent = 'Geometrías dibujadas eliminadas';
+                statusElement.textContent = 'Capas eliminadas';
             }
         } else {
             if (typeof mostrarMensaje === 'function') {
-                mostrarMensaje("No hay geometrías dibujadas para eliminar", 'warning');
+                mostrarMensaje("No hay geometrías ni GeoTIFFs para eliminar", 'warning');
             }
         }
         

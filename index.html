@@ -129,6 +129,7 @@
                             Shapefile
                         </label>
                         <input type="file" id="uploadShp" accept=".zip" hidden>
+                        
                     </div>
                 </div>
             </div>
@@ -529,7 +530,11 @@
         </div>
     </div>
 
+    <!-- Chart.js para gráficos del dashboard -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    
     <!-- Scripts -->
+    <script src="js/projections.js"></script>
     <script src="js/map.js"></script>
     <script src="js/tools.js"></script>
     <script src="js/feedback.js"></script>
@@ -541,6 +546,7 @@
     <script src="js/theme.js"></script>
     <script src="js/sections.js"></script>
     <script src="js/streetview.js"></script>
+    <script src="js/dashboard.js"></script>
     
     <script>
         window.onload = () => {
@@ -548,6 +554,10 @@
             // Inicializar búsqueda de atributos después de que todo esté cargado
             if (window.inicializarBusquedaAtributos) {
                 window.inicializarBusquedaAtributos();
+            }
+            // Inicializar dashboard
+            if (window.inicializarDashboard) {
+                window.inicializarDashboard();
             }
         };
     </script>
