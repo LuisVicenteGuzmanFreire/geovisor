@@ -24,6 +24,12 @@
     <!-- Theme Color for Mobile -->
     <meta name="theme-color" content="#1e293b">
     
+    <!-- Performance hints -->
+    <meta http-equiv="x-dns-prefetch-control" content="on">
+    <link rel="dns-prefetch" href="//unpkg.com">
+    <link rel="dns-prefetch" href="//cdnjs.cloudflare.com">
+    <link rel="dns-prefetch" href="//cdn.jsdelivr.net">
+    
     <link rel="stylesheet" href="style.css">
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     
@@ -37,23 +43,29 @@
         })();
     </script>
 
-    <!-- Librerías geoespaciales -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.8.0/proj4.js"></script>
-    <script src="https://unpkg.com/@turf/turf@6.5.0/turf.min.js"></script>
-    <script src="https://unpkg.com/togeojson@0.16.0/togeojson.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/shpjs@4.0.4/dist/shp.min.js"></script>
-    <script src="https://unpkg.com/jszip@3.10.1/dist/jszip.min.js"></script>
-
-    <!-- Leaflet -->
+    <!-- Preload recursos críticos -->
+    <link rel="preload" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" as="style">
+    <link rel="preload" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js" as="script">
+    <link rel="preload" href="style.css" as="style">
+    
+    <!-- CSS crítico - carga inmediata -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
-
-    <!-- Leaflet-Geoman -->
-    <link rel="stylesheet" href="https://unpkg.com/@geoman-io/leaflet-geoman-free@2.14.0/dist/leaflet-geoman.css" />
-    <script src="https://unpkg.com/@geoman-io/leaflet-geoman-free@2.14.0/dist/leaflet-geoman.min.js"></script>
-
-    <!-- Font Awesome para iconos -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- CSS no crítico - carga diferida -->
+    <link rel="preload" href="https://unpkg.com/@geoman-io/leaflet-geoman-free@2.14.0/dist/leaflet-geoman.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://unpkg.com/@geoman-io/leaflet-geoman-free@2.14.0/dist/leaflet-geoman.css"></noscript>
+
+    <!-- JavaScript crítico -->
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+    
+    <!-- JavaScript no crítico - carga diferida -->
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.8.0/proj4.js"></script>
+    <script defer src="https://unpkg.com/@turf/turf@6.5.0/turf.min.js"></script>
+    <script defer src="https://unpkg.com/togeojson@0.16.0/togeojson.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/shpjs@4.0.4/dist/shp.min.js"></script>
+    <script defer src="https://unpkg.com/jszip@3.10.1/dist/jszip.min.js"></script>
+    <script defer src="https://unpkg.com/@geoman-io/leaflet-geoman-free@2.14.0/dist/leaflet-geoman.min.js"></script>
 </head>
 <body>
     <!-- Barra superior de navegación -->
@@ -530,36 +542,67 @@
         </div>
     </div>
 
-    <!-- Chart.js para gráficos del dashboard -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <!-- Chart.js se cargará dinámicamente cuando se necesite -->
     
-    <!-- Scripts -->
+    <!-- Scripts críticos - carga inmediata -->
     <script src="js/projections.js"></script>
     <script src="js/map.js"></script>
-    <script src="js/tools.js"></script>
     <script src="js/feedback.js"></script>
     <script src="js/interface.js"></script>
-    <script src="js/ui.js"></script>
-    <script src="js/dataLoader.js"></script>
-    <script src="js/gps.js"></script>
-    <script src="js/info.js"></script>
     <script src="js/theme.js"></script>
-    <script src="js/sections.js"></script>
-    <script src="js/streetview.js"></script>
-    <script src="js/dashboard.js"></script>
+    
+    <!-- Scripts no críticos - carga diferida -->
+    <script defer src="js/tools.js"></script>
+    <script defer src="js/ui.js"></script>
+    <script defer src="js/dataLoader.js"></script>
+    <script defer src="js/gps.js"></script>
+    <script defer src="js/info.js"></script>
+    <script defer src="js/sections.js"></script>
+    <script defer src="js/streetview.js"></script>
+    <script defer src="js/dashboard.js"></script>
     
     <script>
-        window.onload = () => {
+        // Inicialización optimizada con carga asíncrona
+        document.addEventListener('DOMContentLoaded', () => {
+            // Inicializar funcionalidades críticas primero
             inicializarApp();
+            
             // Inicializar búsqueda de atributos después de que todo esté cargado
             if (window.inicializarBusquedaAtributos) {
                 window.inicializarBusquedaAtributos();
             }
-            // Inicializar dashboard
-            if (window.inicializarDashboard) {
-                window.inicializarDashboard();
+        });
+        
+        // Inicializar dashboard solo cuando sea necesario (lazy loading)
+        window.addEventListener('load', () => {
+            // Dashboard se inicializará cuando el usuario haga click en el botón
+            console.log('App completamente cargada - Dashboard disponible para inicialización lazy');
+        });
+        
+        // Función para inicializar dashboard solo cuando se necesite
+        const initDashboardLazy = async () => {
+            if (window.inicializarDashboard && !window.dashboardManager) {
+                await window.inicializarDashboard();
             }
         };
+        
+        // Evento global para el botón dashboard (lazy loading)
+        document.addEventListener('click', async (e) => {
+            if (e.target.closest('#toggleDashboard')) {
+                // Inicializar dashboard si no existe
+                if (!window.dashboardManager) {
+                    console.log('Inicializando dashboard por primera vez...');
+                    await initDashboardLazy();
+                }
+                // Alternar dashboard
+                if (window.dashboardManager) {
+                    window.dashboardManager.toggle();
+                }
+            }
+        });
+        
+        // Hacer disponible globalmente
+        window.initDashboardLazy = initDashboardLazy;
     </script>
 </body>
 </html>

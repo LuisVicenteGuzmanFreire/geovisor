@@ -392,9 +392,13 @@ class DashboardManager {
 
     // === EVENTOS ===
     bindEvents() {
-        // Toggle dashboard
-        document.addEventListener('click', (e) => {
+        // Toggle dashboard con lazy loading
+        document.addEventListener('click', async (e) => {
             if (e.target.closest('#toggleDashboard')) {
+                // Si el dashboard no está inicializado, inicializarlo primero
+                if (!window.dashboardManager) {
+                    await window.initDashboardLazy();
+                }
                 this.toggle();
             }
             
@@ -1817,23 +1821,39 @@ class DashboardManager {
 // === INICIALIZACIÓN ===
 let dashboardManager = null;
 
-const inicializarDashboard = () => {
+// Función para cargar Chart.js de manera asíncrona
+const loadChartJS = () => {
+    return new Promise((resolve, reject) => {
+        if (typeof Chart !== 'undefined') {
+            resolve();
+            return;
+        }
+        
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js';
+        script.onload = () => resolve();
+        script.onerror = () => reject(new Error('Failed to load Chart.js'));
+        document.head.appendChild(script);
+    });
+};
+
+const inicializarDashboard = async () => {
     // Destruir instancia anterior si existe
     if (dashboardManager) {
         dashboardManager.destroy();
         dashboardManager = null;
     }
     
-    // Verificar que Chart.js esté disponible
-    if (typeof Chart === 'undefined') {
-        console.warn('Chart.js no está disponible. Cargando desde CDN...');
-        const script = document.createElement('script');
-        script.src = 'https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js';
-        script.onload = () => {
-            dashboardManager = new DashboardManager();
-        };
-        document.head.appendChild(script);
-    } else {
+    try {
+        // Cargar Chart.js de manera asíncrona solo cuando se necesite
+        console.log('Cargando Chart.js...');
+        await loadChartJS();
+        console.log('Chart.js cargado exitosamente');
+        
+        dashboardManager = new DashboardManager();
+    } catch (error) {
+        console.error('Error cargando Chart.js:', error);
+        // Crear dashboard sin gráficos como fallback
         dashboardManager = new DashboardManager();
     }
     
