@@ -1301,6 +1301,9 @@ class DashboardManager {
         document.getElementById('tiempoSesion').textContent = data.tiempoSesion;
         document.getElementById('accionesRealizadas').textContent = data.accionesRealizadas;
         document.getElementById('busquedasRealizadas').textContent = data.busquedasRealizadas;
+        
+        // Actualizar gráfico de actividad
+        this.updateActividadChart();
     }
 
     // === GRÁFICOS ===
@@ -1515,6 +1518,145 @@ class DashboardManager {
         });
     }
 
+    updateActividadChart() {
+        const canvas = document.getElementById('chartActividad');
+        if (!canvas) return;
+        
+        // Destruir gráfico anterior
+        Chart.getChart(canvas)?.destroy();
+        
+        // Fijar dimensiones del canvas
+        canvas.style.height = '250px';
+        canvas.style.maxHeight = '250px';
+        canvas.style.width = '100%';
+        canvas.style.maxWidth = '100%';
+        
+        const ctx = canvas.getContext('2d');
+        
+        if (this.charts.actividad) {
+            this.charts.actividad.destroy();
+            this.charts.actividad = null;
+        }
+        
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Generar datos simulados de actividad en el tiempo
+        const ahora = new Date();
+        const labels = [];
+        const data = [];
+        
+        // Generar datos para las últimas 24 horas (cada 2 horas)
+        for (let i = 23; i >= 0; i -= 2) {
+            const tiempo = new Date(ahora.getTime() - (i * 60 * 60 * 1000));
+            labels.push(tiempo.toLocaleTimeString('es-ES', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            }));
+            
+            // Simular actividad variable (más actividad en horas normales)
+            const hora = tiempo.getHours();
+            let actividad = 0;
+            
+            if (hora >= 8 && hora <= 18) {
+                // Horas de trabajo: más actividad
+                actividad = Math.floor(Math.random() * 15) + 5;
+            } else if (hora >= 19 && hora <= 23) {
+                // Tarde/noche: actividad moderada
+                actividad = Math.floor(Math.random() * 8) + 2;
+            } else {
+                // Madrugada: poca actividad
+                actividad = Math.floor(Math.random() * 3);
+            }
+            
+            data.push(actividad);
+        }
+        
+        this.charts.actividad = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Acciones por Hora',
+                    data: data,
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#3b82f6',
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 2,
+                    pointRadius: 4,
+                    pointHoverRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    intersect: false,
+                    mode: 'index'
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleColor: '#ffffff',
+                        bodyColor: '#ffffff',
+                        borderColor: '#3b82f6',
+                        borderWidth: 1
+                    }
+                },
+                scales: {
+                    x: {
+                        display: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.1)',
+                            drawBorder: false
+                        },
+                        ticks: {
+                            font: {
+                                size: 10
+                            },
+                            maxRotation: 45,
+                            minRotation: 45
+                        }
+                    },
+                    y: {
+                        display: true,
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.1)',
+                            drawBorder: false
+                        },
+                        ticks: {
+                            font: {
+                                size: 10
+                            },
+                            stepSize: 5,
+                            callback: function(value) {
+                                return Number.isInteger(value) ? value : '';
+                            }
+                        }
+                    }
+                },
+                elements: {
+                    point: {
+                        hoverBackgroundColor: '#1d4ed8'
+                    }
+                },
+                onResize: function(chart, size) {
+                    chart.canvas.style.height = '250px';
+                    chart.canvas.style.maxHeight = '250px';
+                }
+            }
+        });
+        
+        console.log('Gráfico de actividad creado exitosamente');
+    }
+
     // === UTILIDADES ===
     getFeatureCoordinates(feature) {
         try {
@@ -1576,7 +1718,7 @@ class DashboardManager {
                     // Los datos ya se actualizan en updateUI
                     break;
                 case 'actividad':
-                    // Datos en tiempo real
+                    this.updateActividadChart();
                     break;
             }
         }, 100);
